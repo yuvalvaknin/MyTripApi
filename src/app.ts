@@ -1,30 +1,23 @@
 import express from 'express';
-import morgan from 'morgan';
-import helmet from 'helmet';
-import cors from 'cors';
+import bodyParser from 'body-parser';
+import mongoose from 'mongoose';
+import postRoutes from './api/posts/postRouter';
+import * as dotenv from 'dotenv';
 
-import * as middlewares from './middlewares';
-import api from './api';
-import MessageResponse from './interfaces/MessageResponse';
+dotenv.config();
 
-require('dotenv').config();
-
+const {
+  MONGO_URI
+} = process.env;
 const app = express();
+app.use(bodyParser.json());
 
-app.use(morgan('dev'));
-app.use(helmet());
-app.use(cors());
-app.use(express.json());
+app.use('/posts', postRoutes);
 
-app.get<{}, MessageResponse>('/', (req, res) => {
-  res.json({
-    message: '🦄🌈✨👋🌎🌍🌏✨🌈🦄',
-  });
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-app.use('/api/v1', api);
-
-app.use(middlewares.notFound);
-app.use(middlewares.errorHandler);
-
-export default app;
+mongoose.connect(MONGO_URI || "Mac**bizona");
+mongoose.connection.on('error', (error: Error) => console.log(error));
