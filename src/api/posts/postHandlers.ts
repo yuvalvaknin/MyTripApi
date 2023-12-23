@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
-import PostModel from './post';
+import PostModel, { Post } from './post';
 import createPostDto from './dtos/createPostDto'
 import updatePostDto from './dtos/updatePostDto';
 
 export const findAll = async (req: Request, res: Response) => {
-  console.log('got finalAll request');
+  console.log('Got final all posts request');
   try {
     const posts = await PostModel.find({});
     res.json(posts);
@@ -15,7 +15,7 @@ export const findAll = async (req: Request, res: Response) => {
 }
 
 export const createPost = async (req: Request, res: Response) => {
-  console.log('got createPost request with the body:', req.body);
+  console.log('Got create post request with the body:', req.body);
   try {
     const postData: createPostDto = req.body;
     const newPost = await PostModel.create(postData)
@@ -29,7 +29,7 @@ export const createPost = async (req: Request, res: Response) => {
 };
 
 export const updatePost = async (req: Request, res: Response) => {
-  console.log('got updatePost request with the body:', req.body);
+  console.log('Got update post request with the body:', req.body);
   try {
     const updatedPostFields: updatePostDto = req.body;
 
@@ -44,7 +44,7 @@ export const updatePost = async (req: Request, res: Response) => {
 };
 
 export const deletePost = async (req: Request, res: Response) => {
-  console.log('got deletePost request on post with id:', req.params.postId);
+  console.log('Got delete post request on post with id:', req.params.postId);
   try {
     const postId = req.params.postId;
 
@@ -56,3 +56,29 @@ export const deletePost = async (req: Request, res: Response) => {
     res.status(500).send('Internal Server Error');
   }
 };
+
+export const getPostsByCountry = async (req: Request, res: Response) => {
+  console.log('Got request: get posts by country:', req.params.country);
+  try {
+    const countryName = req.params.country;
+    const posts = await PostModel.find({country: countryName});
+
+    res.json(posts);
+  } catch (error) {
+    console.error('Got an error while fetching posts:', error);
+    res.status(500).send('Internal Server Error');
+  }
+}
+
+export const getPostsByUserName = async (req: Request, res: Response) => {
+  console.log('Got request: get posts by user:', req.params.userName);
+  try {
+    const userName = req.params.userName;
+    const posts = await PostModel.find({userName: userName});
+
+    res.json(posts);
+  } catch (error) {
+    console.error('Got an error while fetching posts:', error);
+    res.status(500).send('Internal Server Error');
+  }
+}
