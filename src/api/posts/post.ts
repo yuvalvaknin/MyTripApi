@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-interface Post extends Document {
+export interface Post extends Document {
   description: string;
   country: string;
   userName: string;
