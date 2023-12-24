@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import postRoutes from './api/posts/postRouter';
 import authRoutes from './api/users/AuthRoute';
 import messageRoutes from './api/messages/messageRoute';
+import commentRoutes from './api/comments/commentRoute';
 import * as dotenv from 'dotenv';
 import cors from 'cors';
 
@@ -18,8 +19,9 @@ app.use(bodyParser.json());
 app.use(cors())
 
 app.use('/posts', postRoutes);
-app.use('/auth', authRoutes)
-app.use('/messages', messageRoutes)
+app.use('/auth', authRoutes);
+app.use('/messages', messageRoutes);
+app.use('/comments', commentRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

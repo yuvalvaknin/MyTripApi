@@ -3,7 +3,7 @@ import { createNewMessage, getAllMessageBetweenTwoUsers } from "./messageHandler
 
 const router = express.Router();
 
-router.post('/', createNewMessage);
+router.post('/sendMessage', createNewMessage);
 router.get('/getChat', getAllMessageBetweenTwoUsers);
 
 export default router;
