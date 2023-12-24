@@ -10,7 +10,11 @@ export interface Post extends Document {
 const postSchema = new Schema({
   description: String,
   country: String,
-  userName: String,
+  userName: {
+    type: Schema.Types.ObjectId, 
+    ref: 'users',
+    require: true
+  },
   comments: [String],
 });
 
