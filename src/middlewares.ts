@@ -2,8 +2,6 @@ import { NextFunction, Request, Response } from 'express';
 
 import ErrorResponse from './interfaces/ErrorResponse';
 import jwt from 'jsonwebtoken';
-import { token } from 'morgan';
-import { IUser } from './models/UserModel';
 import { Types } from 'mongoose';
 
 export function notFound(req: Request, res: Response, next: NextFunction) {

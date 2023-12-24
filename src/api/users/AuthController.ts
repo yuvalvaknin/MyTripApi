@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import User from '../models/UserModel';
+import User from './user';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { Types } from 'mongoose';
@@ -7,6 +7,7 @@ import { Types } from 'mongoose';
 const register = async (req: Request, res: Response) => {
     const email = req.body.email;
     const password = req.body.password;
+    const userName = req.body.userName;
     if (!email || !password) {
         return res.status(400).send("missing email or password");
     }
@@ -17,7 +18,7 @@ const register = async (req: Request, res: Response) => {
         }
         const salt = await bcrypt.genSalt(10);
         const encryptedPassword = await bcrypt.hash(password, salt);
-        const rs2 = await User.create({ 'email': email, 'password': encryptedPassword });
+        const rs2 = await User.create({ 'email': email, 'password': encryptedPassword,userName : userName});
         return res.status(201).send(rs2);
     } catch (err) {
         return res.status(400).send("error missing email or password");

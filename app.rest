@@ -1,17 +1,18 @@
 
 ###
 
-POST http://localhost:5000/api/v1/auth/register
+POST http://localhost:5000/auth/register
 Content-Type: application/json
 
 {
-    "email": "test1@test.com",
-    "password": "1234567890"
+    "email": "test2@test.com",
+    "password": "1234567890",
+    "userName": "Test"
 }
 
 ###
 
-POST http://localhost:5000/api/v1/auth/login
+POST http://localhost:5000/auth/login
 Content-Type: application/json
 
 {
