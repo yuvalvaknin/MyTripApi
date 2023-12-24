@@ -2,7 +2,8 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import postRoutes from './api/posts/postRouter';
-import authRoutes from './api/users/AuthRoute'
+import authRoutes from './api/users/AuthRoute';
+import messageRoutes from './api/messages/messageRoute';
 import * as dotenv from 'dotenv';
 import cors from 'cors';
 
@@ -18,6 +19,7 @@ app.use(cors())
 
 app.use('/posts', postRoutes);
 app.use('/auth', authRoutes)
+app.use('/messages', messageRoutes)
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
