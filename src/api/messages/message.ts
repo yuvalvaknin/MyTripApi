@@ -1,4 +1,3 @@
-import { Timestamp } from 'mongodb';
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface Message extends Document {
