@@ -16,6 +16,10 @@ const register = async (req: Request, res: Response) => {
         if (rs != null) {
             return res.status(406).send("email already exists");
         }
+        const userByUN = await User.findOne({ 'userName' : userName });
+        if (userByUN != null) {
+            return res.status(406).send("User Name already exists");
+        }
         const salt = await bcrypt.genSalt(10);
         const encryptedPassword = await bcrypt.hash(password, salt);
         const rs2 = await User.create({ 'email': email, 'password': encryptedPassword,userName : userName});
@@ -26,13 +30,13 @@ const register = async (req: Request, res: Response) => {
 }
 
 const login = async (req: Request, res: Response) => {
-    const email = req.body.email;
+    const userName = req.body.userName;
     const password = req.body.password;
-    if (!email || !password) {
+    if (!userName || !password) {
         return res.status(400).send("missing email or password");
     }
     try {
-        const user = await User.findOne({ 'email': email });
+        const user = await User.findOne({ 'userName': userName });
         if (user == null) {
             return res.status(401).send("there is no user with this email");
         }
