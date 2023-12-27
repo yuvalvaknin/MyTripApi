@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import PostModel, { Post } from './post';
 import createPostDto from './dtos/createPostDto'
-import updatePostDto from './dtos/updatePostDto';
+import UpdatePostDto from './dtos/updatePostDto';
 
 export const findAll = async (req: Request, res: Response) => {
   console.log('Got final all posts request');
@@ -31,7 +31,7 @@ export const createPost = async (req: Request, res: Response) => {
 export const updatePost = async (req: Request, res: Response) => {
   console.log('Got update post request with the body:', req.body);
   try {
-    const updatedPostFields: updatePostDto = req.body;
+    const updatedPostFields: UpdatePostDto = req.body;
 
     const updatedPost = await PostModel.findByIdAndUpdate(updatedPostFields.postId, updatedPostFields, { new: true });
 
