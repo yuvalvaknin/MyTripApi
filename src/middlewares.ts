@@ -20,17 +20,18 @@ export function errorHandler(err: Error, req: Request, res: Response<ErrorRespon
   });
 }
 
-interface JwtPayload {
+export interface JwtPayload {
   _id: Types.ObjectId;
+  userName : string;
   // Add other properties from your jwt payload if needed
 }
 
-export function authenticate(req: Request, res: Response<ErrorResponse>, next: NextFunction) {
+export function authenticate(req: Request, res: Response, next: NextFunction) {
   const authHeaders = req.headers['authorization']?.split(" ");
   if (!authHeaders || authHeaders[0] !== 'Bearer' || !authHeaders[1]) return res.sendStatus(401);
   const token = authHeaders[1];
 
-  jwt.verify(token, process.env.JWT_REFRESH_TOKEN || '', (err, user : jwt.JwtPayload | string | undefined) => {
+  jwt.verify(token, process.env.JWT_ACCESS_TOKEN || '', (err, user : jwt.JwtPayload | string | undefined) => {
     if (err) return res.status(403);
     req.body = {...req.body, user : (user as JwtPayload)._id, token : token}
     next()
