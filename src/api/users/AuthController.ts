@@ -48,7 +48,8 @@ const login = async (req: Request, res: Response) => {
 
         const accessToken = jwt.sign({ _id : user._id, userName : user.userName }, process.env.JWT_ACCESS_TOKEN || '', { expiresIn: process.env.JWT_EXPIRATION });
         const refreshToken = jwt.sign({ _id: user._id, userName : user.userName }, process.env.JWT_REFRESH_TOKEN || '');
-
+        res.cookie('access_token', accessToken);
+        res.cookie('refresh_token', refreshToken);
         user.tokens == null ? user.tokens = [refreshToken] : user.tokens.push(refreshToken);
         await user.save();
 
@@ -65,17 +66,28 @@ const cleanTokens = async (user : mongoose.Document<unknown, {}, IUser> & IUser 
     await user.save();
 }
 
-
+export const getUser = async (req: Request, res: Response) => {
+    console.log('Got final all posts request');
+    try {
+      const user = await User.findById(req.body._id);
+      if (user) res.json({userName : user.userName});
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  }
 
 const logout = async (req: Request, res: Response) => {
     try {
-        const user = await User.findById(req.body.user);
+        const user = await User.findById(req.body._id);
         if (user == null) return res.status(403).send('invalid Request')
         if(!user.tokens.includes(req.body.token)){
             cleanTokens(user);
             return res.status(403).send('invalid Request')
         }
         user.tokens.splice(user.tokens.findIndex(tok => tok === req.body.token), 1)
+        res.clearCookie('access_token')
+        res.clearCookie('refresh_token')
         await user.save();
         return res.sendStatus(200)
     } catch (err) {
@@ -84,13 +96,11 @@ const logout = async (req: Request, res: Response) => {
 }
 
 const refreshToken = async (req: Request, res: Response) => {
-    const authHeaders = req.headers['authorization']?.split(" ");
-    if (!authHeaders || authHeaders[0] !== 'Bearer' || !authHeaders[1]) return res.sendStatus(401);
-    const token = authHeaders[1];
+    const token = req.cookies["refresh_token"];
 
     if (token == null) res.sendStatus(401);
 
-    jwt.verify(token, process.env.JWT_REFRESH_TOKEN || '', async (err, user : string | jwt.JwtPayload | undefined) => {
+    jwt.verify(token, process.env.JWT_REFRESH_TOKEN || '', async (err : any, user : string | jwt.JwtPayload | undefined) => {
         if (err) return res.status(403).send(err.message)
         if (!user) return res.status(403);
         const userId = (user as JwtPayload)._id;
@@ -107,6 +117,9 @@ const refreshToken = async (req: Request, res: Response) => {
 
             const accessToken = jwt.sign({ _id : currUser._id, userName : currUser.userName }, process.env.JWT_ACCESS_TOKEN || '', { expiresIn: process.env.JWT_EXPIRATION });
             const refreshToken = jwt.sign({ _id: currUser._id, userName : currUser.userName }, process.env.JWT_REFRESH_TOKEN || '');
+            
+            res.cookie('access_token', accessToken);
+            res.cookie('refresh_token', refreshToken);
 
             currUser.tokens == null ? currUser.tokens = [refreshToken] : currUser.tokens[currUser.tokens.indexOf(token)] = refreshToken;
             await currUser.save();
@@ -121,5 +134,6 @@ export default {
     register,
     login,
     logout,
-    refreshToken
+    refreshToken,
+    getUser
 }

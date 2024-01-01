@@ -7,6 +7,7 @@ import messageRoutes from './api/messages/messageRoute';
 import commentRoutes from './api/comments/commentRoute';
 import * as dotenv from 'dotenv';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -14,9 +15,15 @@ const {
   MONGO_URI
 } = process.env;
 const app = express();
-app.use(bodyParser.json());
+app.use(cors({
+  origin: 'http://localhost:3001', // Replace with the actual origin of your React app
+  credentials: true,
+}));
 
-app.use(cors())
+app.options('*', cors());
+
+app.use(cookieParser());
+app.use(bodyParser.json());
 
 app.use('/posts', postRoutes);
 app.use('/auth', authRoutes);
