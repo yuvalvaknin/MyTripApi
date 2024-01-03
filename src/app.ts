@@ -10,7 +10,7 @@ import cors from 'cors';
 import { createServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import MessageModel from './api/messages/message';
-import { log } from 'console';
+import { BiMap } from './bi-map';
 
 dotenv.config();
 
@@ -27,8 +27,6 @@ const io = new Server(httpServer, {
   },
 });
 
-
-
 app.use(bodyParser.json());
 
 app.use(cors());
@@ -44,12 +42,15 @@ mongoose.connect(
 );
 mongoose.connection.on('error', (error: Error) => console.log(error));
 
-let connectedUsers = new Map<string, Socket>();
+let connectedSockets = new Map<string, Socket>();
+
+let users = new BiMap<string, string>();
 
 io.on('connection', (socket: Socket) => {
   console.log('new connection has been made');
-  socket.on('new-user', username => {
-    connectedUsers.set(username, socket);
+  socket.on('new-user', (username) => {
+    connectedSockets.set(socket.id, socket);
+    users.set(socket.id, username);
     console.log(`${username} has connected`);
   });
   socket.on('send-message', (message) => {
@@ -58,13 +59,19 @@ io.on('connection', (socket: Socket) => {
     } catch (e) {
       console.error(e);
     }
-    connectedUsers.get(message.toUser)?.emit('receive-message', message);
+
+    const socketId = users.getFromValue(message.toUser);
+    if (socketId) {
+      connectedSockets.get(socketId)?.emit('receive-message', message);
+    }
     console.log('sending message: ', message);
   });
-  socket.on('leave-chat', () => connectedUsers.delete(socket.id));
+  socket.on('disconnect', () => {
+    console.log(`${users.get(socket.id)} has disconnected`);
+    connectedSockets.delete(socket.id);
+    users.removeByKey(socket.id);
+  });
 });
-
-
 
 httpServer.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
