@@ -64,7 +64,7 @@ io.on('connection', (socket: Socket) => {
     if (socketId) {
       connectedSockets.get(socketId)?.emit('receive-message', message);
     }
-    console.log('sending message: ', message);
+    console.log(`sending message from ${message.fromUser} to ${message.toUser}`);
   });
   socket.on('disconnect', () => {
     console.log(`${users.get(socket.id)} has disconnected`);
