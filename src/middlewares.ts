@@ -34,12 +34,12 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
     jwt.verify(token, process.env.JWT_ACCESS_TOKEN || '', (err : any, user : jwt.JwtPayload | string | undefined) => {
       if (err) {
         if (err.name === 'TokenExpiredError' && req.cookies['refresh_token']){
-          authController.refreshToken(req, res);
+          authController.refreshToken(req, res, next);
         }
-        return res.status(403);
+      } else {  
+        req.body = {...req.body, _id : (user as JwtPayload)._id}
+        next()
       }
-      req.body = {...req.body, _id : (user as JwtPayload)._id}
-      next()
     });
   }
 }

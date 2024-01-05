@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import User, { IUser } from './user';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -67,12 +67,12 @@ const cleanTokens = async (user : mongoose.Document<unknown, {}, IUser> & IUser 
 }
 
 export const getUser = async (req: Request, res: Response) => {
-    console.log('Got final all posts request');
+    console.log('Got user');
     try {
       const user = await User.findById(req.body._id);
       if (user) res.json({userName : user.userName});
     } catch (error) {
-      console.error('Error fetching posts:', error);
+      console.error('Error fetching user:', error);
       res.status(500).send('Internal Server Error');
     }
   }
@@ -81,11 +81,12 @@ const logout = async (req: Request, res: Response) => {
     try {
         const user = await User.findById(req.body._id);
         if (user == null) return res.status(403).send('invalid Request')
-        if(!user.tokens.includes(req.body.token)){
-            cleanTokens(user);
+        if(!user.tokens.includes(req.cookies['refresh_token'])){
+            user.tokens.slice(0, user.tokens.length);
+            await user.save();
             return res.status(403).send('invalid Request')
         }
-        user.tokens.splice(user.tokens.findIndex(tok => tok === req.body.token), 1)
+        user.tokens.splice(user.tokens.findIndex(tok => tok === req.cookies['refresh_token']), 1)
         res.clearCookie('access_token')
         res.clearCookie('refresh_token')
         await user.save();
@@ -95,7 +96,7 @@ const logout = async (req: Request, res: Response) => {
     }
 }
 
-const refreshToken = async (req: Request, res: Response) => {
+const refreshToken = async (req: Request, res: Response, next: NextFunction) => {
     const token = req.cookies["refresh_token"];
 
     if (token == null) res.sendStatus(401);
@@ -110,10 +111,10 @@ const refreshToken = async (req: Request, res: Response) => {
                 _id: Types.ObjectId;
             }) | null = await User.findById(userId);
             if (currUser == null) return res.status(403).send('invalid request'); 
-            if (!currUser.tokens.includes(token)){
-                cleanTokens(currUser);
-                return res.status(403).send('invalid Request')
-            }
+            // if (!currUser.tokens.includes(token)){
+            //     cleanTokens(currUser);
+            //     return res.status(403).send('invalid Request')
+            // }
 
             const accessToken = jwt.sign({ _id : currUser._id, userName : currUser.userName }, process.env.JWT_ACCESS_TOKEN || '', { expiresIn: process.env.JWT_EXPIRATION });
             const refreshToken = jwt.sign({ _id: currUser._id, userName : currUser.userName }, process.env.JWT_REFRESH_TOKEN || '');
@@ -123,7 +124,9 @@ const refreshToken = async (req: Request, res: Response) => {
 
             currUser.tokens == null ? currUser.tokens = [refreshToken] : currUser.tokens[currUser.tokens.indexOf(token)] = refreshToken;
             await currUser.save();
-            res.status(200).send({'accessTokten' : accessToken, 'refreshToken' : refreshToken})
+            req.body = {...req.body, _id : (user as JwtPayload)._id}
+            next()
+       //     res.status(200).send({'accessTokten' : accessToken, 'refreshToken' : refreshToken})
         } catch (error : any) {
             res.status(403).send(error.message)
         }
