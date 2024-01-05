@@ -4,7 +4,7 @@ export interface IUser {
   email: string;
   password: string;
   userName: string;
-  tokens : [string]
+  tokens : string[]
 }
 
 const userSchema = new mongoose.Schema<IUser>({
