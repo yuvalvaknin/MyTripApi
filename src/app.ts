@@ -42,15 +42,12 @@ mongoose.connect(
 );
 mongoose.connection.on('error', (error: Error) => console.log(error));
 
-let connectedSockets = new Map<string, Socket>();
-
 let users = new BiMap<string, string>();
 
 io.on('connection', (socket: Socket) => {
   console.log('new connection has been made');
   socket.on('new-user', (username) => {
-    connectedSockets.set(socket.id, socket);
-    users.set(socket.id, username);
+    !users.hasValue(username) && users.set(socket.id, username);
     console.log(`${username} has connected`);
   });
   socket.on('send-message', (message) => {
@@ -62,13 +59,14 @@ io.on('connection', (socket: Socket) => {
 
     const socketId = users.getFromValue(message.toUser);
     if (socketId) {
-      connectedSockets.get(socketId)?.emit('receive-message', message);
+      io.to(socketId)?.emit('receive-message', message);
     }
-    console.log(`sending message from ${message.fromUser} to ${message.toUser}`);
+    console.log(
+      `sending message from ${message.fromUser} to ${message.toUser}`,
+    );
   });
   socket.on('disconnect', () => {
     console.log(`${users.get(socket.id)} has disconnected`);
-    connectedSockets.delete(socket.id);
     users.removeByKey(socket.id);
   });
 });
