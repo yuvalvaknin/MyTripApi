@@ -8,6 +8,6 @@ router.post("/login", authController.login);
 router.post("/logout", authenticate ,authController.logout);
 router.post("/refreshToken", authController.refreshToken);
 router.get("/user", authenticate ,authController.getUser);
+router.post('/google', authController.googleLogin) 
 
-
-export default router;
+export default router; 
