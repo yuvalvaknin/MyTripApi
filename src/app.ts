@@ -11,25 +11,30 @@ import { createServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import MessageModel from './api/messages/message';
 import { BiMap } from './bi-map';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
-const { MONGO_URI } = process.env;
+const { MONGO_URI, FRONT_PATH } = process.env;
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: FRONT_PATH,
     methods: ['GET', 'POST'],
   },
 });
 
+app.use(cookieParser())
 app.use(bodyParser.json());
 
-app.use(cors());
+app.use(cors({
+  origin : FRONT_PATH,
+  credentials : true
+}));
 
 app.use('/posts', postRoutes);
 app.use('/auth', authRoutes);

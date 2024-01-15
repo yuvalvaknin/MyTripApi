@@ -4,7 +4,8 @@ export interface IUser {
   email: string;
   password: string;
   userName: string;
-  tokens : [string]
+  tokens : string[]
+  isGoogleLogin : boolean; 
 }
 
 const userSchema = new mongoose.Schema<IUser>({
@@ -18,10 +19,12 @@ const userSchema = new mongoose.Schema<IUser>({
   },
   password: {
     type: String,
-    required: true,
   },
   tokens: {
     type : [String]
+  }, 
+  isGoogleLogin: { 
+    type : Boolean 
   }
 
 });
