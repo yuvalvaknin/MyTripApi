@@ -12,10 +12,14 @@ import cookieParser from 'cookie-parser';
 dotenv.config();
 
 const {
-  MONGO_URI
+  MONGO_URI,
+  FRONT_PATH
 } = process.env;
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin : FRONT_PATH,
+  credentials : true
+}));
 
 app.options('*', cors());
 
