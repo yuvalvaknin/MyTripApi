@@ -17,13 +17,13 @@ dotenv.config();
 
 const { MONGO_URI, FRONT_PATH } = process.env;
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: FRONT_PATH,
     methods: ['GET', 'POST'],
   },
 });
