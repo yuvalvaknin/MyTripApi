@@ -9,12 +9,12 @@ export interface Message extends Document {
 
 const messageSchema = new Schema({
   fromUser: {
-    type: Schema.Types.ObjectId, 
+    type: String, 
     ref: 'users',
     require: true
   },
   toUser: {
-    type: Schema.Types.ObjectId, 
+    type: String, 
     ref: 'users',
     require: true
   },

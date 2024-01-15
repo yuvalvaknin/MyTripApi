@@ -4,6 +4,6 @@ import { createNewMessage, getAllMessageBetweenTwoUsers } from "./messageHandler
 const router = express.Router();
 
 router.post('/sendMessage', createNewMessage);
-router.get('/getChat', getAllMessageBetweenTwoUsers);
+router.post('/getChat', getAllMessageBetweenTwoUsers);
 
 export default router;
