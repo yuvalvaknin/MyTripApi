@@ -205,7 +205,7 @@ const googleLogin = async (req: Request<any, LoginResponseDto|string, {token : s
     let user : any = await User.findOne({ email : googleResponse.email }) 
     if (user == null){ 
         const userName = await tryCreateUser(googleResponse.name)  
-        user = await User.create({email : googleResponse.email, userName : userName, tokens :[]}) 
+        user = await User.create({email : googleResponse.email, userName : userName, tokens :[], isGoogleLogin : true}) 
     } 
     loginUser(user, res);
     } catch (ex : any) { 
