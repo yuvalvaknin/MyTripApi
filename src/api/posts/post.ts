@@ -4,6 +4,7 @@ export interface Post extends Document {
   description: string;
   country: string;
   userName: string;
+  photo: string | null;
 }
 
 const postSchema = new Schema({
