@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import postRoutes from './api/posts/postRouter';
 import authRoutes from './api/users/AuthRoute';
+import userRoutes from './api/users/UserRoute'
 import messageRoutes from './api/messages/messageRoute';
 import commentRoutes from './api/comments/commentRoute';
 import * as dotenv from 'dotenv';
@@ -38,6 +39,7 @@ app.use(cors({
 
 app.use('/posts', postRoutes);
 app.use('/auth', authRoutes);
+app.use('/user', userRoutes);
 app.use('/messages', messageRoutes);
 app.use('/comments', commentRoutes);
 
