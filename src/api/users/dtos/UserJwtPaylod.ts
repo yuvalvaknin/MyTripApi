@@ -1,7 +1,10 @@
 import { ObjectId } from "mongodb"
 
-interface UserJWTPaylod {
+export interface UserIdDto {
     _id : ObjectId
+}
+
+interface UserJWTPaylod extends UserIdDto {
     userName : string
 }
 

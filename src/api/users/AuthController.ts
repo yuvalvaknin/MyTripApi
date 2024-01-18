@@ -10,6 +10,11 @@ import UserJWTPaylod from './dtos/UserJwtPaylod';
 import axios from 'axios';
 import mongoose from 'mongoose';
 
+export const encryptPassword = async (password : string) => {
+    const salt = await bcrypt.genSalt(10);
+    return await bcrypt.hash(password, salt);
+}
+
 const register = async (req: Request<any, string, RegisterDto>, res: Response<string>) => {
     const reqBody = req.body;
     console.log(`trying to register ${reqBody.userName}`)
@@ -28,8 +33,7 @@ const register = async (req: Request<any, string, RegisterDto>, res: Response<st
             console.error("User Name already exists")
             return res.status(406).send("User Name already exists");
         }
-        const salt = await bcrypt.genSalt(10);
-        const encryptedPassword = await bcrypt.hash(reqBody.password, salt);
+        const encryptedPassword = await encryptPassword(reqBody.password)
         const userCreated = await User.create({...reqBody, password: encryptedPassword, tokens : []});
         console.log(`${userCreated.userName} registerd`)
         return res.status(201).send(userCreated.userName);
@@ -41,13 +45,19 @@ const register = async (req: Request<any, string, RegisterDto>, res: Response<st
 
 const loginUser = async (user : (mongoose.Document<unknown, {}, IUser> & IUser & {
     _id: ObjectId;
-}), res : Response) => {
+}), res : Response<LoginResponseDto | string>) => {
     const cookies = createCookies(user, res)
     if (cookies){
         user.tokens.push(cookies.refreshToken);
         await user.save();
         console.error(`${user.userName} logged in`)
-        return res.status(200).send({'userName' : user.userName ,'accessToken': cookies.accessToken, 'refreshToken' : cookies.refreshToken });
+        return res.status(200).send({
+            userName : user.userName,
+            email : user.email,
+            isGoogleLogin : user.isGoogleLogin,
+            accessToken : cookies.accessToken,
+            refreshToken : cookies.refreshToken
+        });
     }
     return res;
 }
@@ -94,23 +104,6 @@ const login = async (req: Request<any, LoginResponseDto|string, LoginDto>,
     }
 }
 
-export const getUser = async ( req: Request<any, UserResponseDto|string, ObjectId>,
-     res: Response<UserResponseDto | string>) => {
-    console.log(`Trying to get user ${req.body._id}`);
-    try {
-      const user = await User.findById(req.body._id);
-      if (user)
-      {
-        console.log(`got user ${user.userName}`);
-        res.json({ userName : user.userName});
-      }
-      else console.error(`${req.body._id} doesn't found`)
-    } catch (error : any) {
-      console.error('Error fetching user:', error.message);
-      res.status(500).send(`Error fetching user ${error.message}`);
-    }
-  }
-
 const logout = async (req: Request<any, string, ObjectId>, res: Response<string>) => {
     try {
         console.log(`Trying to logout user ${req.body._id}`);
@@ -126,7 +119,7 @@ const logout = async (req: Request<any, string, ObjectId>, res: Response<string>
             console.error(`token expired long time ago, clean ${user.userName} tokens`);
             return res.status(403).send("the token doesn't exist anymore")
         }
-        user.tokens = user.tokens.map(tok => tok === userToken ? userToken : tok );
+        user.tokens = user.tokens.filter(tok => tok !== userToken);
         res.clearCookie('access_token')
         res.clearCookie('refresh_token')
         await user.save();
@@ -218,6 +211,5 @@ export default {
     login,
     logout,
     refreshToken,
-    getUser,
     googleLogin 
 }
