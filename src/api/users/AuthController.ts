@@ -41,13 +41,19 @@ const register = async (req: Request<any, string, RegisterDto>, res: Response<st
 
 const loginUser = async (user : (mongoose.Document<unknown, {}, IUser> & IUser & {
     _id: ObjectId;
-}), res : Response) => {
+}), res : Response<LoginResponseDto | string>) => {
     const cookies = createCookies(user, res)
     if (cookies){
         user.tokens.push(cookies.refreshToken);
         await user.save();
         console.error(`${user.userName} logged in`)
-        return res.status(200).send({'userName' : user.userName ,'accessToken': cookies.accessToken, 'refreshToken' : cookies.refreshToken });
+        return res.status(200).send({
+            userName : user.userName,
+            email : user.email,
+            isGoogleLogin : user.isGoogleLogin,
+            accessToken : cookies.accessToken,
+            refreshToken : cookies.refreshToken
+        });
     }
     return res;
 }
