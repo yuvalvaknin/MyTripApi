@@ -26,7 +26,7 @@ export const getUser = async ( req: Request<any, UserResponseDto|string, UserIdD
 export const updateUserName = async ( req: Request<any, UserResponseDto|string, ChangeUserNameDto>,
     res: Response<UserResponseDto | string>) => {
         const reqBody = req.body;
-        console.log(`Trying to update user ${reqBody._id}`);
+        console.log(`Trying to update userName for ${reqBody._id}`);
         try {
             const user = await User.findById(reqBody._id);
             if (user)
@@ -39,6 +39,7 @@ export const updateUserName = async ( req: Request<any, UserResponseDto|string, 
                         return res.status(400).send('username already existed')
                     }
                 }
+                console.log(`userName changed from ${user.userName} to ${reqBody.userName}`)
                 user.userName = reqBody.userName;
                 await user.save();
                 res.json({
@@ -57,7 +58,7 @@ export const updateUserName = async ( req: Request<any, UserResponseDto|string, 
 export const updatePassword = async ( req: Request<any, UserResponseDto|string, ChangePasswordDto>,
     res: Response<UserResponseDto | string>) => {
         const reqBody = req.body;
-        console.log(`Trying to update user ${reqBody._id}`);
+        console.log(`Trying to update password for ${reqBody._id}`);
         try {
             const user = await User.findById(reqBody._id);
             if (user)
@@ -70,6 +71,7 @@ export const updatePassword = async ( req: Request<any, UserResponseDto|string, 
                 }
                 user.password = await encryptPassword(reqBody.newPassword);
                 await user.save();
+                console.log(`password updated successfuly for ${user.userName}`)
                 res.json({
                     userName : user.userName,
                     email: user.email,
