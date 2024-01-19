@@ -10,6 +10,11 @@ import UserJWTPaylod from './dtos/UserJwtPaylod';
 import axios from 'axios';
 import mongoose from 'mongoose';
 
+export const encryptPassword = async (password : string) => {
+    const salt = await bcrypt.genSalt(10);
+    return await bcrypt.hash(password, salt);
+}
+
 const register = async (req: Request<any, string, RegisterDto>, res: Response<string>) => {
     const reqBody = req.body;
     console.log(`trying to register ${reqBody.userName}`)
@@ -28,8 +33,7 @@ const register = async (req: Request<any, string, RegisterDto>, res: Response<st
             console.error("User Name already exists")
             return res.status(406).send("User Name already exists");
         }
-        const salt = await bcrypt.genSalt(10);
-        const encryptedPassword = await bcrypt.hash(reqBody.password, salt);
+        const encryptedPassword = await encryptPassword(reqBody.password)
         const userCreated = await User.create({...reqBody, password: encryptedPassword, tokens : []});
         console.log(`${userCreated.userName} registerd`)
         return res.status(201).send(userCreated.userName);
