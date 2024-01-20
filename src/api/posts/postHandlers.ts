@@ -115,7 +115,8 @@ export const getPostsByCountry = async (req: Request, res: Response) => {
     console.error('Got an error while fetching posts:', error);
     res.status(500).send('Internal Server Error');
   }
-}
+};
+
 
 export const getPostsByUserName = async (req: Request, res: Response) => {
   console.info('Got request: get posts by user:', req.params.userName);
@@ -129,4 +130,4 @@ export const getPostsByUserName = async (req: Request, res: Response) => {
     console.error('Got an error while fetching posts:', error);
     res.status(500).send('Internal Server Error');
   }
-}
+};  

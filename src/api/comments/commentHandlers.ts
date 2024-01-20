@@ -11,7 +11,7 @@ export const createComment = async (req: Request, res: Response) => {
     console.error('Got an error while creating comment:', error);
     res.status(500).send('Internal Server Error');
   }
-}
+};
 
 export const getCommentsNumberPerPost = async (req: Request, res: Response) => {
     try {
@@ -23,7 +23,7 @@ export const getCommentsNumberPerPost = async (req: Request, res: Response) => {
         console.error('Got an error while fetching comment:', error);
         res.status(500).send('Internal Server Error');
     }
-}
+};
 
 export const getCommentsByPost = async (req: Request, res: Response) => {
     try {
@@ -35,4 +35,4 @@ export const getCommentsByPost = async (req: Request, res: Response) => {
         console.error('Got an error while fetching comment:', error);
         res.status(500).send('Internal Server Error');
     }
-}
+};
