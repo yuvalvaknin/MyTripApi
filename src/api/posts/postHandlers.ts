@@ -2,24 +2,15 @@ import { Request, Response } from 'express';
 import PostModel, { Post } from './post';
 import createPostDto from './dtos/createPostDto'
 import UpdatePostDto from './dtos/updatePostDto';
-import fs from 'fs';
-import path from 'path';
 import returnPostDto from './dtos/returnPostDto';
+import { addPhoto, attachPhoto, createPhotoDirectory, deletePhoto } from '../../utils/photoUtils';
 
-const PHOTOS_DIR_PATH = path.join(__dirname, 'photos');
-
-if (!fs.existsSync(PHOTOS_DIR_PATH)) {
-  fs.mkdirSync(PHOTOS_DIR_PATH);
-}
+const POST_PHOTO_DIRECTORY = createPhotoDirectory(__dirname);
 
 const attachPhotoToPosts = (posts: Post[]): returnPostDto[] => {
   const postsWithPhoto: returnPostDto[] = [];
     posts.forEach(post => {
-      const filePath = path.join(PHOTOS_DIR_PATH, post._id.toString());
-      if (fs.existsSync(filePath)) {
-        const fileContent = fs.readFileSync(filePath, 'utf-8');
-        post.photo = fileContent;
-      }
+      post.photo = attachPhoto(POST_PHOTO_DIRECTORY, post._id.toString());
       postsWithPhoto.push({
         postId: post._id,
         description: post.description,
@@ -49,11 +40,7 @@ export const createPost = async (req: Request, res: Response) => {
     const postData: createPostDto = req.body;
     const newPost = await PostModel.create(postData)
 
-    const base64ImageData = postData.photo;
-
-    const filePath = path.join(PHOTOS_DIR_PATH, newPost._id.toString());
-
-    fs.writeFileSync(filePath, base64ImageData);
+    addPhoto(POST_PHOTO_DIRECTORY, newPost._id.toString(), postData.photo)
   
     res.json(newPost);
 
@@ -70,10 +57,7 @@ export const updatePost = async (req: Request, res: Response) => {
 
     const updatedPost = await PostModel.findByIdAndUpdate(updatedPostFields.postId, updatedPostFields, { new: true });
 
-    if (updatedPostFields.photo) {
-      const filePath = path.join(PHOTOS_DIR_PATH, updatedPostFields.postId.toString());
-      fs.writeFileSync(filePath, updatedPostFields.photo);
-    }
+    addPhoto(POST_PHOTO_DIRECTORY, updatedPost._id.toString(), updatedPostFields.photo)
 
     res.json(updatedPost);
 
@@ -90,11 +74,7 @@ export const deletePost = async (req: Request, res: Response) => {
 
     await PostModel.findByIdAndDelete({_id: postId});
 
-    const filePath = path.join(PHOTOS_DIR_PATH, postId.toString());
-
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
+    deletePhoto(POST_PHOTO_DIRECTORY ,postId);
 
     res.status(204).end();
 

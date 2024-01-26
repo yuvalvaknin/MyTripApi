@@ -5,19 +5,13 @@ import jwt from 'jsonwebtoken';
 import RegisterDto from './dtos/RegisterDto';
 import {LoginDto, LoginResponseDto} from './dtos/LoginDto';
 import { ObjectId } from 'mongodb';
-import UserResponseDto from './dtos/UserResponseDto';
 import UserJWTPaylod from './dtos/UserJwtPaylod';
 import axios from 'axios';
 import mongoose from 'mongoose';
-import fs from 'fs';
-import path from 'path';
-import UserController, { attachProfilePhoto } from './UserController';
+import { attachProfilePhoto } from './UserController';
+import { addPhoto, createPhotoDirectory } from '../../utils/photoUtils';
 
-export const USER_PHOTOS_DIR_PATH = path.join(__dirname, 'photos');
-
-if (!fs.existsSync(USER_PHOTOS_DIR_PATH)) {
-  fs.mkdirSync(USER_PHOTOS_DIR_PATH);
-}
+export const USER_PHOTOS_DIR_PATH = createPhotoDirectory(__dirname);
 
 export const encryptPassword = async (password : string) => {
     const salt = await bcrypt.genSalt(10);
@@ -45,9 +39,7 @@ const register = async (req: Request<any, string, RegisterDto>, res: Response<st
         const encryptedPassword = await encryptPassword(reqBody.password)
         const userCreated = await User.create({...reqBody, password: encryptedPassword, tokens : []});
 
-        const base64ImageData = reqBody.image;
-        const filePath = path.join(USER_PHOTOS_DIR_PATH, userCreated._id.toString());
-        fs.writeFileSync(filePath, base64ImageData);
+        addPhoto(USER_PHOTOS_DIR_PATH, userCreated._id.toString(), reqBody.image);
 
         console.log(`${userCreated.userName} registerd`)
         return res.status(201).send(userCreated.userName);

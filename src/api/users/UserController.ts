@@ -5,19 +5,14 @@ import { Request, Response } from 'express';
 import { UserIdDto } from "./dtos/UserJwtPaylod";
 import { ChangePasswordDto, ChangeProfileImageDto, ChangeUserNameDto } from "./dtos/UpdateUserDtos";
 import { USER_PHOTOS_DIR_PATH, encryptPassword } from './AuthController';
-import fs from 'fs';
-import path from 'path';
 import mongoose, { Types } from 'mongoose';
+import { addPhoto, attachPhoto } from '../../utils/photoUtils';
 
 export const attachProfilePhoto = (user : mongoose.Document<unknown, {}, IUser> & IUser & {
     _id: Types.ObjectId;
 }) : UserResponseDto  =>{
-    const filePath = path.join(USER_PHOTOS_DIR_PATH, user._id.toString());
-      if (fs.existsSync(filePath)) {
-        const fileContent = fs.readFileSync(filePath, 'utf-8');
-        return ({email : user.email, isGoogleLogin : user.isGoogleLogin, userName: user.userName, image : fileContent})
-      }
-    return ({email : user.email, isGoogleLogin : user.isGoogleLogin, userName: user.userName, image : ''})
+    const photo = attachPhoto(USER_PHOTOS_DIR_PATH, user._id.toString());
+    return ({email : user.email, isGoogleLogin : user.isGoogleLogin, userName: user.userName, image : photo})
 }
 
 export const getUser = async ( req: Request<any, UserResponseDto|string, UserIdDto>,
@@ -101,8 +96,7 @@ export const updateProflieImage = async ( req: Request<any, UserResponseDto|stri
             {
                 console.log(`got user ${user.userName}`);
                 if (reqBody.image) {
-                    const filePath = path.join(USER_PHOTOS_DIR_PATH, reqBody._id.toString());
-                    fs.writeFileSync(filePath, reqBody.image);
+                   addPhoto(USER_PHOTOS_DIR_PATH, user._id.toString(), reqBody.image)
                 }
                 console.log(`password updated successfuly for ${user.userName}`)
                 res.json(attachProfilePhoto(user));
