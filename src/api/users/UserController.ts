@@ -98,7 +98,7 @@ export const updateProflieImage = async ( req: Request<any, UserResponseDto|stri
                 if (reqBody.image) {
                    addPhoto(USER_PHOTOS_DIR_PATH, user._id.toString(), reqBody.image)
                 }
-                console.log(`password updated successfuly for ${user.userName}`)
+                console.log(`profile image updated successfuly for ${user.userName}`)
                 res.json(attachProfilePhoto(user));
             }
         } catch (error : any) {
