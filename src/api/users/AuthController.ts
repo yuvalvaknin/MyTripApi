@@ -5,10 +5,13 @@ import jwt from 'jsonwebtoken';
 import RegisterDto from './dtos/RegisterDto';
 import {LoginDto, LoginResponseDto} from './dtos/LoginDto';
 import { ObjectId } from 'mongodb';
-import UserResponseDto from './dtos/UserResponseDto';
 import UserJWTPaylod from './dtos/UserJwtPaylod';
 import axios from 'axios';
 import mongoose from 'mongoose';
+import { attachProfilePhoto } from './UserController';
+import { addPhoto, createPhotoDirectory } from '../../utils/photoUtils';
+
+export const USER_PHOTOS_DIR_PATH = createPhotoDirectory(__dirname);
 
 export const encryptPassword = async (password : string) => {
     const salt = await bcrypt.genSalt(10);
@@ -35,6 +38,9 @@ const register = async (req: Request<any, string, RegisterDto>, res: Response<st
         }
         const encryptedPassword = await encryptPassword(reqBody.password)
         const userCreated = await User.create({...reqBody, password: encryptedPassword, tokens : []});
+
+        addPhoto(USER_PHOTOS_DIR_PATH, userCreated._id.toString(), reqBody.image);
+
         console.log(`${userCreated.userName} registerd`)
         return res.status(201).send(userCreated.userName);
     } catch (err) {
@@ -52,9 +58,7 @@ const loginUser = async (user : (mongoose.Document<unknown, {}, IUser> & IUser &
         await user.save();
         console.error(`${user.userName} logged in`)
         return res.status(200).send({
-            userName : user.userName,
-            email : user.email,
-            isGoogleLogin : user.isGoogleLogin,
+            ...attachProfilePhoto(user),
             accessToken : cookies.accessToken,
             refreshToken : cookies.refreshToken
         });
