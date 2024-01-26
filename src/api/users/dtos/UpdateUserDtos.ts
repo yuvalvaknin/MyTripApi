@@ -8,3 +8,7 @@ export interface ChangePasswordDto extends UserIdDto {
     oldPassword : string,
     newPassword : string
 }
+
+export interface ChangeProfileImageDto extends UserIdDto {
+    image : string
+}

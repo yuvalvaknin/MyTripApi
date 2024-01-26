@@ -6,5 +6,5 @@ import { authenticate } from "../../middlewares";
 router.get("/", authenticate , userController.getUser);
 router.post("/userName", authenticate, userController.updateUserName);
 router.post("/password", authenticate , userController.updatePassword);
-
+router.post("/profileImage", authenticate, userController.updateProflieImage)
 export default router; 

@@ -9,6 +9,15 @@ import UserResponseDto from './dtos/UserResponseDto';
 import UserJWTPaylod from './dtos/UserJwtPaylod';
 import axios from 'axios';
 import mongoose from 'mongoose';
+import fs from 'fs';
+import path from 'path';
+import UserController, { attachProfilePhoto } from './UserController';
+
+export const USER_PHOTOS_DIR_PATH = path.join(__dirname, 'photos');
+
+if (!fs.existsSync(USER_PHOTOS_DIR_PATH)) {
+  fs.mkdirSync(USER_PHOTOS_DIR_PATH);
+}
 
 export const encryptPassword = async (password : string) => {
     const salt = await bcrypt.genSalt(10);
@@ -35,6 +44,11 @@ const register = async (req: Request<any, string, RegisterDto>, res: Response<st
         }
         const encryptedPassword = await encryptPassword(reqBody.password)
         const userCreated = await User.create({...reqBody, password: encryptedPassword, tokens : []});
+
+        const base64ImageData = reqBody.image;
+        const filePath = path.join(USER_PHOTOS_DIR_PATH, userCreated._id.toString());
+        fs.writeFileSync(filePath, base64ImageData);
+
         console.log(`${userCreated.userName} registerd`)
         return res.status(201).send(userCreated.userName);
     } catch (err) {
@@ -52,9 +66,7 @@ const loginUser = async (user : (mongoose.Document<unknown, {}, IUser> & IUser &
         await user.save();
         console.error(`${user.userName} logged in`)
         return res.status(200).send({
-            userName : user.userName,
-            email : user.email,
-            isGoogleLogin : user.isGoogleLogin,
+            ...attachProfilePhoto(user),
             accessToken : cookies.accessToken,
             refreshToken : cookies.refreshToken
         });
