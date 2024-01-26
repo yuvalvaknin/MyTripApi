@@ -13,6 +13,9 @@ import { Server, Socket } from 'socket.io';
 import MessageModel from './api/messages/message';
 import { BiMap } from './bi-map';
 import cookieParser from 'cookie-parser';
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from './swagger';
+
 
 dotenv.config();
 
@@ -30,12 +33,14 @@ const io = new Server(httpServer, {
 });
 
 app.use(cookieParser())
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb'}));
 
 app.use(cors({
   origin : FRONT_PATH,
   credentials : true
 }));
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use('/posts', postRoutes);
 app.use('/auth', authRoutes);
