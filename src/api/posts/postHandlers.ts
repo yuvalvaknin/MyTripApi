@@ -4,29 +4,26 @@ import createPostDto from './dtos/createPostDto'
 import UpdatePostDto from './dtos/updatePostDto';
 import returnPostDto from './dtos/returnPostDto';
 import { addPhoto, attachPhoto, createPhotoDirectory, deletePhoto } from '../../utils/photoUtils';
+import user, { IUser } from '../users/user';
+import { Types } from 'mongoose';
 
 const POST_PHOTO_DIRECTORY = createPhotoDirectory(__dirname);
 
 const attachPhotoToPosts = (posts: Post[]): returnPostDto[] => {
-  const postsWithPhoto: returnPostDto[] = [];
-    posts.forEach(post => {
-      post.photo = attachPhoto(POST_PHOTO_DIRECTORY, post._id.toString());
-      postsWithPhoto.push({
-        postId: post._id,
-        description: post.description,
-        country: post.country,
-        userName: post.userName,
-        photo: post.photo
-      });
-    })
-
-  return postsWithPhoto;
+  return posts.map((post) => 
+    ({
+      postId: post._id,
+      description: post.description,
+      country: post.country,
+      userName: (post.userId as unknown as IUser).userName,
+      photo: attachPhoto(POST_PHOTO_DIRECTORY, post._id.toString())
+    }))
 }
 
 export const findAll = async (req: Request, res: Response) => {
   console.log('Got final all posts request');
   try {
-    const posts = await PostModel.find({});
+    const posts = await PostModel.find().populate('userId', 'userName');
     res.json(attachPhotoToPosts(posts));
   } catch (error) {
     console.error('Error fetching posts:', error);
@@ -37,8 +34,12 @@ export const findAll = async (req: Request, res: Response) => {
 export const createPost = async (req: Request, res: Response) => {
   console.log('Got create post request with the body:', req.body);
   try {
-    const postData: createPostDto = req.body;
-    const newPost = await PostModel.create(postData)
+    const postData: createPostDto & {_id : Types.ObjectId} = req.body;
+    const newPost = await PostModel.create({
+      country : postData.country,
+      description : postData.description,
+      userId : postData._id
+    });
 
     addPhoto(POST_PHOTO_DIRECTORY, newPost._id.toString(), postData.photo)
   
@@ -88,7 +89,7 @@ export const getPostsByCountry = async (req: Request, res: Response) => {
   console.log('Got request: get posts by country:', req.params.country);
   try {
     const countryName = req.params.country;
-    const posts = await PostModel.find({country: countryName});
+    const posts = await PostModel.find({country: countryName}).populate('userId', 'userName');
 
     res.json(attachPhotoToPosts(posts));
   } catch (error) {
@@ -103,7 +104,7 @@ export const getPostsByUserName = async (req: Request, res: Response) => {
   
   try {
     const userName = req.params.userName;
-    const posts :Post[] = await PostModel.find({userName: userName});
+    const posts :Post[] = await PostModel.find({userName: userName}).populate('userId', 'userName');
     
     res.json(attachPhotoToPosts(posts));
   } catch (error) {

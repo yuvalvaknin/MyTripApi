@@ -1,5 +1,6 @@
 import express from "express";
 import { createComment, getCommentsByPost, getCommentsNumberPerPost } from "./commentHandlers";
+import { authenticate } from "../../middlewares";
 
 const router = express.Router();
 
@@ -29,7 +30,7 @@ const router = express.Router();
  *     tags:
  *      - comments
  */
-router.post('/postComment', createComment);
+router.post('/postComment', authenticate, createComment);
 
 /**
  * @swagger

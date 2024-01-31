@@ -1,17 +1,17 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, ObjectId, Schema, Types } from 'mongoose';
 
 export interface Post extends Document {
   description: string;
   country: string;
-  userName: string;
+  userId: Types.ObjectId;
   photo: string | null;
 }
 
 const postSchema = new Schema({
   description: String,
   country: String,
-  userName: {
-    type: String, 
+  userId: {
+    type: Types.ObjectId, 
     ref: 'users',
     require: true,
   },
