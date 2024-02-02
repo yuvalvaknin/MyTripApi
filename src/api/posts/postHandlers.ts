@@ -104,7 +104,7 @@ export const getPostsByUserName = async (req: Request, res: Response) => {
   
   try {
     const userName = req.params.userName;
-    const user = await User.findOne({userName : userName})
+    const user = await User.findOne({userName : userName});
     const posts :Post[] = await PostModel.find({userId: user._id}).populate('userId', 'userName');
     
     res.json(attachPhotoToPosts(posts));

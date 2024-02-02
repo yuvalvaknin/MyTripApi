@@ -15,6 +15,7 @@ import { BiMap } from './bi-map';
 import cookieParser from 'cookie-parser';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger';
+import User from './api/users/user';
 
 
 dotenv.config();
@@ -62,9 +63,18 @@ io.on('connection', (socket: Socket) => {
     !users.hasValue(username) && users.set(socket.id, username);
     console.log(`${username} has connected`);
   });
-  socket.on('send-message', (message) => {
+  socket.on('send-message', async (message) => {
     try {
-      MessageModel.create(message);
+
+      const newMessage = { ...message };
+
+      const fromUser = await User.findOne({ userName : message.fromUser }); 
+      const toUser = await User.findOne({ userName : message.toUser });
+
+      newMessage.fromUser = fromUser._id;
+      newMessage.toUser = toUser._id;
+
+      MessageModel.create(newMessage);
     } catch (e) {
       console.error(e);
     }
@@ -79,7 +89,7 @@ io.on('connection', (socket: Socket) => {
   });
   socket.on('disconnect', () => {
     console.log(`${users.get(socket.id)} has disconnected`);
-    users.removeByKey(socket.id);
+    users.removeByKey(socket.id); 
   });
 });
 

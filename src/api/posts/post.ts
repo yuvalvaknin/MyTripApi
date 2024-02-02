@@ -1,4 +1,4 @@
-import mongoose, { Document, ObjectId, Schema, Types } from 'mongoose';
+import mongoose, { Document, Schema, Types } from 'mongoose';
 
 export interface Post extends Document {
   description: string;
