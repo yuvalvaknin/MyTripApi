@@ -4,7 +4,7 @@ import createPostDto from './dtos/createPostDto'
 import UpdatePostDto from './dtos/updatePostDto';
 import returnPostDto from './dtos/returnPostDto';
 import { addPhoto, attachPhoto, createPhotoDirectory, deletePhoto } from '../../utils/photoUtils';
-import user, { IUser } from '../users/user';
+import User, { IUser } from '../users/user';
 import { Types } from 'mongoose';
 
 const POST_PHOTO_DIRECTORY = createPhotoDirectory(__dirname);
@@ -104,7 +104,8 @@ export const getPostsByUserName = async (req: Request, res: Response) => {
   
   try {
     const userName = req.params.userName;
-    const posts :Post[] = await PostModel.find({userName: userName}).populate('userId', 'userName');
+    const user = await User.findOne({userName : userName})
+    const posts :Post[] = await PostModel.find({userId: user._id}).populate('userId', 'userName');
     
     res.json(attachPhotoToPosts(posts));
   } catch (error) {
