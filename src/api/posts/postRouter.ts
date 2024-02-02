@@ -80,7 +80,7 @@ router.post('/', authenticate, createPost);
  *     tags:
  *      - posts
  */
-router.put('/', updatePost);
+router.put('/',authenticate, updatePost);
 
 /**
  * @swagger
@@ -107,7 +107,7 @@ router.put('/', updatePost);
  *     tags:
  *      - posts
  */
-router.delete('/:postId', deletePost);
+router.delete('/:postId',authenticate, deletePost);
 
 /**
  * @swagger

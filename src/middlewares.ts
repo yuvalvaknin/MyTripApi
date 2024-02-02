@@ -30,8 +30,8 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
   } else {
     jwt.verify(token, process.env.JWT_ACCESS_TOKEN || '', (err : any, user : any) => {
       if (err) {
-        if (err.name === 'TokenExpiredError' && req.cookies['refresh_token']){
-          authController.refreshToken(req, res, next);
+        if (err.name === 'TokenExpiredError'){
+          res.status(401).send(err.name);
         } else {
           console.error(`token problem`)
           res.sendStatus(403);

@@ -135,7 +135,7 @@ const logout = async (req: Request<any, string, ObjectId>, res: Response<string>
     }
 }
 
-const refreshToken = async (req: Request, res: Response, next: NextFunction) => {
+const refreshToken = async (req: Request, res: Response) => {
     console.log('trying refresh token')
     const token = req.cookies["refresh_token"];
     if (token == null) {
@@ -173,10 +173,10 @@ const refreshToken = async (req: Request, res: Response, next: NextFunction) => 
                 verifiedUser.tokens = verifiedUser.tokens.map(tok => tok === token ? tokens.refreshToken : tok );
                 await verifiedUser.save();
                 console.log(`token refreshed for ${verifiedUser.userName}`)
-                req.body = {...req.body, _id : verifiedUser._id}
-                next()
+                return res.status(200).send('token refreshed successfuly')
+            }else {
+                return res.status(400).send('problem in token refreshing')
             }
-            return res;
         } catch (error : any) {
             console.error(`couldn't refresh token: ${error.message}`)
             return res.status(403).send(error.message)
