@@ -26,7 +26,7 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
   const token = req.cookies['access_token'];
   if (!token){
       console.error('there is no cookie to authenticate')
-      res.status(400).send('there is no cookies');
+      res.status(401).send('there is no cookies');
   } else {
     jwt.verify(token, process.env.JWT_ACCESS_TOKEN || '', (err : any, user : any) => {
       if (err) {
