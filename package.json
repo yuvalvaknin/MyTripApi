@@ -12,7 +12,9 @@
     "testUser": "tsc && jest --detectOpenHandles --runInBand ./test/user.test.ts",
     "testPost": "tsc && jest --detectOpenHandles --runInBand ./test/post.test.ts",
     "testComment": "tsc && jest --detectOpenHandles --runInBand ./test/comment.test.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prod": "cp .envprod .env && tsc -p tsconfig_prod.json && pm2 restart ecosystem.config.js --env production",
+    "prod1": "cp .envprod .env && tsc -p tsconfig_prod.json &&  node ./dist/src/server.js"
   },
   "keywords": [],
   "author": "CJ R. <cj@null.computer> (https://w3cj.now.sh)",
