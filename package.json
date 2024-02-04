@@ -8,7 +8,8 @@
     "dev": "nodemon src/app.ts",
     "build": "tsc",
     "lint": "eslint --fix src test",
-    "test": "jest",
+    "test": "tsc && jest --detectOpenHandles --runInBand",
+    "testUser": "tsc && jest --detectOpenHandles --runInBand ./test/user.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [],

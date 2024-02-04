@@ -3,7 +3,7 @@ import User, { IUser } from './user';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import RegisterDto from './dtos/RegisterDto';
-import {LoginDto, LoginResponseDto} from './dtos/LoginDto';
+import {LoginDto, UserResponseDto} from './dtos/LoginDto';
 import { ObjectId } from 'mongodb';
 import UserJWTPaylod from './dtos/UserJwtPaylod';
 import axios from 'axios';
@@ -51,17 +51,13 @@ const register = async (req: Request<any, string, RegisterDto>, res: Response<st
 
 const loginUser = async (user : (mongoose.Document<unknown, {}, IUser> & IUser & {
     _id: ObjectId;
-}), res : Response<LoginResponseDto | string>) => {
+}), res : Response<UserResponseDto | string>) => {
     const cookies = createCookies(user, res)
     if (cookies){
         user.tokens.push(cookies.refreshToken);
         await user.save();
-        console.error(`${user.userName} logged in`)
-        return res.status(200).send({
-            ...attachProfilePhoto(user),
-            accessToken : cookies.accessToken,
-            refreshToken : cookies.refreshToken
-        });
+        console.info(`${user.userName} logged in`)
+        return res.json(attachProfilePhoto(user));
     }
     return res;
 }
@@ -82,8 +78,8 @@ const createCookies = (user : (mongoose.Document<unknown, {}, IUser> & IUser & {
     return {accessToken : accessToken, refreshToken : refreshToken}
 }
 
-const login = async (req: Request<any, LoginResponseDto|string, LoginDto>,
-     res: Response<LoginResponseDto | string>) => {
+const login = async (req: Request<any, UserResponseDto|string, LoginDto>,
+     res: Response<UserResponseDto | string>) => {
     const reqBody = req.body;
     if (!reqBody.userName || !reqBody.password) {
         console.error("missing email or password")
@@ -194,8 +190,8 @@ const tryCreateUser = async (userName : string) => {
     return index === 0 ? userName : userName + index; 
 } 
  
-const googleLogin = async (req: Request<any, LoginResponseDto|string, {token : string}>, 
-    res: Response<LoginResponseDto | string>) => { 
+const googleLogin = async (req: Request<any, UserResponseDto|string, {token : string}>, 
+    res: Response<UserResponseDto | string>) => { 
     const token = req.body.token; 
     try { 
     const googleResponse = await axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${token}`).then(res => res.data); 

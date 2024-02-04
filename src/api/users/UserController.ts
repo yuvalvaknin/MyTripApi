@@ -107,4 +107,17 @@ export const updateProflieImage = async ( req: Request<any, UserResponseDto|stri
         }
 }
 
-export default { getUser, updateUserName,updatePassword, updateProflieImage }
+export const getProflieImage = async ( req: Request<any, string, {}>,
+    res: Response<string>) => {
+        const reqParams = req.params;
+        console.log(`Trying to update profile image for ${reqParams.userName}`);
+        try {
+            const user = await User.findOne({userName : reqParams.userName})
+            res.json(attachPhoto(USER_PHOTOS_DIR_PATH, user._id.toString()))
+        } catch (error : any) {
+            console.error('Error get image for user:', error.message);
+            res.status(500).send(`Error get image of ${error.message}`);
+        }
+}
+
+export default { getUser, updateUserName,updatePassword, updateProflieImage, getProflieImage }

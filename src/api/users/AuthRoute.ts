@@ -6,7 +6,7 @@ import { authenticate } from "../../middlewares";
 router.post("/register", authController.register);
 router.post("/login", authController.login);
 router.post("/logout", authenticate ,authController.logout);
-router.post("/refreshToken", authController.refreshToken);
+router.get("/refreshToken", authController.refreshToken);
 router.post('/google', authController.googleLogin) 
 
 export default router; 
