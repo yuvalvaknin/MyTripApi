@@ -110,7 +110,7 @@ io.on('connection', (socket: Socket) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Server is running on http${process.env.NODE_ENV === 'production' && 's'}://localhost:${PORT}`);
+  console.log(`Server is running on http${process.env.NODE_ENV === 'production' ? 's' : ''}://localhost:${PORT}`);
 });
 
 export default app;
