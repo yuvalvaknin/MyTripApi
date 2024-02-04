@@ -16,17 +16,33 @@ import cookieParser from 'cookie-parser';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger';
 import User from './api/users/user';
+import https from 'https';
+import fs from 'fs';
 
 
 dotenv.config();
 
 const { MONGO_URI, FRONT_PATH } = process.env;
 
-const PORT = process.env.PORT || 3000;
+const PORT = (process.env.NODE_ENV === 'production' ? process.env.HTTPS_PORT : process.env.PORT) || 3000;
 
 const app = express();
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
+
+let server;
+
+if (process.env.NODE_ENV !== 'production') {
+  console.log('development');
+  server = createServer(app);
+} else {
+  console.log('PRODUCTION');
+  const options2 = {
+    key: fs.readFileSync('../client-key.pem'),
+    cert: fs.readFileSync('../client-cert.pem')
+  };
+  server = https.createServer(options2, app);
+}
+
+const io = new Server(server, {
   cors: {
     origin: FRONT_PATH,
     methods: ['GET', 'POST'],
@@ -93,7 +109,7 @@ io.on('connection', (socket: Socket) => {
   });
 });
 
-httpServer.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
