@@ -14,7 +14,7 @@
     "testComment": "tsc && jest --detectOpenHandles --runInBand ./test/comment.test.ts",
     "typecheck": "tsc --noEmit",
     "prod": "cp .envprod .env && tsc -p tsconfig_prod.json && pm2 restart ecosystem.config.js --env production",
-    "prod1": "cp .envprod .env && tsc -p tsconfig_prod.json &&  node ./dist/src/server.js"
+    "prod1": "cp .envprod .env && tsc -p tsconfig_prod.json &&  node ./dist/src/app.js"
   },
   "keywords": [],
   "author": "CJ R. <cj@null.computer> (https://w3cj.now.sh)",
