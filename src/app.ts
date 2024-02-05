@@ -44,7 +44,6 @@ if (process.env.NODE_ENV !== 'production') {
 
 const io = new Server(server, {
   cors: {
-    origin: FRONT_PATH,
     methods: ['GET', 'POST'],
   },
 });
