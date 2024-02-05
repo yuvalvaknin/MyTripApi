@@ -73,8 +73,8 @@ const createCookies = (user : (mongoose.Document<unknown, {}, IUser> & IUser & {
     }
     const accessToken = jwt.sign({ _id : user._id, userName : user.userName } as UserJWTPaylod, process.env.JWT_ACCESS_TOKEN, { expiresIn: process.env.JWT_EXPIRATION });
     const refreshToken = jwt.sign({ _id: user._id, userName : user.userName } as UserJWTPaylod, process.env.JWT_REFRESH_TOKEN);
-    res.cookie('access_token', accessToken, {sameSite: 'none'});
-    res.cookie('refresh_token', refreshToken, {sameSite: 'none'});
+    res.cookie('access_token', accessToken, {sameSite: 'none', secure: true, httpOnly: true});
+    res.cookie('refresh_token', refreshToken, {sameSite: 'none', secure: true, httpOnly: true});
     return {accessToken : accessToken, refreshToken : refreshToken}
 }
 
