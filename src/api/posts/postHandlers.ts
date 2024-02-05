@@ -6,6 +6,7 @@ import returnPostDto from './dtos/returnPostDto';
 import { addPhoto, attachPhoto, createPhotoDirectory, deletePhoto } from '../../utils/photoUtils';
 import User, { IUser } from '../users/user';
 import { Types } from 'mongoose';
+import { WithUserId } from '../users/dtos/UserJwtPaylod';
 
 const POST_PHOTO_DIRECTORY = createPhotoDirectory(__dirname);
 
@@ -15,7 +16,7 @@ const attachPhotoToPosts = (posts: Post[]): returnPostDto[] => {
       postId: post._id,
       description: post.description,
       country: post.country,
-      userName: (post.userId as unknown as IUser).userName,
+      userName: !post.userId ? 'Deleted User':(post.userId as unknown as IUser).userName,
       photo: attachPhoto(POST_PHOTO_DIRECTORY, post._id.toString())
     }))
 }
@@ -34,11 +35,11 @@ export const findAll = async (req: Request, res: Response) => {
 export const createPost = async (req: Request, res: Response) => {
   console.log('Got create post request with the body:', req.body);
   try {
-    const postData: createPostDto & {_id : Types.ObjectId} = req.body;
+    const postData: WithUserId<createPostDto> = req.body;
     const newPost = await PostModel.create({
       country : postData.country,
       description : postData.description,
-      userId : postData._id
+      userId : postData._userId
     });
 
     addPhoto(POST_PHOTO_DIRECTORY, newPost._id.toString(), postData.photo)

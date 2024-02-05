@@ -10,6 +10,8 @@
     "lint": "eslint --fix src test",
     "test": "tsc && jest --detectOpenHandles --runInBand",
     "testUser": "tsc && jest --detectOpenHandles --runInBand ./test/user.test.ts",
+    "testPost": "tsc && jest --detectOpenHandles --runInBand ./test/post.test.ts",
+    "testComment": "tsc && jest --detectOpenHandles --runInBand ./test/comment.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [],

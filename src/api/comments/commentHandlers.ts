@@ -10,7 +10,7 @@ export const createComment = async (req: Request, res: Response) => {
         const createdComment = await CommentModel.create({
             commentContent : newComment.commentContent,
             postId : newComment.postId,
-            userId : newComment._id
+            userId : newComment._userId
         });
 
         res.json(createdComment);
@@ -39,7 +39,7 @@ export const getCommentsByPost = async (req: Request, res: Response<returnCommen
         res.json(comments.map(com => ({
             commentContent : com.commentContent,
             postId : com.postId,
-            userName : (com.userId as unknown as IUser).userName
+            userName : !com.userId ? 'Deleted User' :(com.userId as unknown as IUser).userName
         })));
     } catch (error) {
         console.error('Got an error while fetching comment:', error);

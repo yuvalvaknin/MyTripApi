@@ -17,15 +17,15 @@ export const attachProfilePhoto = (user : mongoose.Document<unknown, {}, IUser> 
 
 export const getUser = async ( req: Request<any, UserResponseDto|string, UserIdDto>,
     res: Response<UserResponseDto | string>) => {
-   console.log(`Trying to get user ${req.body._id}`);
+   console.log(`Trying to get user ${req.body._userId}`);
    try {
-     const user = await User.findById(req.body._id);
+     const user = await User.findById(req.body._userId);
      if (user)
      {
        console.log(`got user ${user.userName}`);
        res.json(attachProfilePhoto(user));
      }
-     else console.error(`${req.body._id} doesn't found`)
+     else console.error(`${req.body._userId} doesn't found`)
    } catch (error : any) {
      console.error('Error fetching user:', error.message);
      res.status(500).send(`Error fetching user ${error.message}`);
@@ -35,9 +35,9 @@ export const getUser = async ( req: Request<any, UserResponseDto|string, UserIdD
 export const updateUserName = async ( req: Request<any, UserResponseDto|string, ChangeUserNameDto>,
     res: Response<UserResponseDto | string>) => {
         const reqBody = req.body;
-        console.log(`Trying to update userName for ${reqBody._id}`);
+        console.log(`Trying to update userName for ${reqBody._userId}`);
         try {
-            const user = await User.findById(reqBody._id);
+            const user = await User.findById(reqBody._userId);
             if (user)
             {
                 console.log(`got user ${user.userName}`);
@@ -53,7 +53,7 @@ export const updateUserName = async ( req: Request<any, UserResponseDto|string, 
                 await user.save();
                 res.json(attachProfilePhoto(user));
             }
-            else console.error(`${reqBody._id} doesn't found`)
+            else console.error(`${reqBody._userId} doesn't found`)
         } catch (error : any) {
             console.error('Error fetching user:', error.message);
             res.status(500).send(`Error fetching user ${error.message}`);
@@ -63,9 +63,9 @@ export const updateUserName = async ( req: Request<any, UserResponseDto|string, 
 export const updatePassword = async ( req: Request<any, UserResponseDto|string, ChangePasswordDto>,
     res: Response<UserResponseDto | string>) => {
         const reqBody = req.body;
-        console.log(`Trying to update password for ${reqBody._id}`);
+        console.log(`Trying to update password for ${reqBody._userId}`);
         try {
-            const user = await User.findById(reqBody._id);
+            const user = await User.findById(reqBody._userId);
             if (user)
             {
                 console.log(`got user ${user.userName}`);
@@ -79,7 +79,7 @@ export const updatePassword = async ( req: Request<any, UserResponseDto|string, 
                 console.log(`password updated successfuly for ${user.userName}`)
                 res.json(attachProfilePhoto(user));
             }
-            else console.error(`${reqBody._id} doesn't found`)
+            else console.error(`${reqBody._userId} doesn't found`)
         } catch (error : any) {
             console.error('Error fetching user:', error.message);
             res.status(500).send(`Error fetching user ${error.message}`);
@@ -89,9 +89,9 @@ export const updatePassword = async ( req: Request<any, UserResponseDto|string, 
 export const updateProflieImage = async ( req: Request<any, UserResponseDto|string, ChangeProfileImageDto>,
     res: Response<UserResponseDto | string>) => {
         const reqBody = req.body;
-        console.log(`Trying to update profile image for ${reqBody._id}`);
+        console.log(`Trying to update profile image for ${reqBody._userId}`);
         try {
-            const user = await User.findById(reqBody._id);
+            const user = await User.findById(reqBody._userId);
             if (user)
             {
                 console.log(`got user ${user.userName}`);

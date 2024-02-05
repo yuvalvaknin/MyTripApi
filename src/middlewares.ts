@@ -38,7 +38,7 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
         }
       } else {  
         console.log(`${(user as UserJWTPaylod).userName} authenticated successfuly`)
-        req.body = {...req.body, _id : (user as UserJWTPaylod)._id}
+        req.body = {...req.body, _userId : (user as UserJWTPaylod)._id}
         next()
       }
     });

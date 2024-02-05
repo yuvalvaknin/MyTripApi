@@ -1,10 +1,11 @@
 import { ObjectId } from "mongodb"
 
-export type WithUserId<T> = T & { _id: ObjectId }
+export type WithUserId<T> = T & { _userId: ObjectId }
 
 export type UserIdDto = WithUserId<{}>
 
-interface UserJWTPaylod extends UserIdDto {
+interface UserJWTPaylod {
+    _id : ObjectId
     userName : string
 }
 

@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import RegisterDto from './dtos/RegisterDto';
 import {LoginDto, UserResponseDto} from './dtos/LoginDto';
 import { ObjectId } from 'mongodb';
-import UserJWTPaylod from './dtos/UserJwtPaylod';
+import UserJWTPaylod, { UserIdDto } from './dtos/UserJwtPaylod';
 import axios from 'axios';
 import mongoose from 'mongoose';
 import { attachProfilePhoto } from './UserController';
@@ -104,10 +104,10 @@ const login = async (req: Request<any, UserResponseDto|string, LoginDto>,
     }
 }
 
-const logout = async (req: Request<any, string, ObjectId>, res: Response<string>) => {
+const logout = async (req: Request<any, string, UserIdDto>, res: Response<string>) => {
     try {
-        console.log(`Trying to logout user ${req.body._id}`);
-        const user = await User.findById(req.body._id);
+        console.log(`Trying to logout user ${req.body._userId}`);
+        const user = await User.findById(req.body._userId);
         const userToken = req.cookies['refresh_token'];
         if (user == null || userToken == null) {
             console.error('no user to logout');
