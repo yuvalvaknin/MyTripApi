@@ -53,7 +53,6 @@ app.use(cookieParser())
 app.use(bodyParser.json({ limit: '50mb'}));
 
 app.use(cors({
-  origin : FRONT_PATH,
   credentials : true
 }));
 
