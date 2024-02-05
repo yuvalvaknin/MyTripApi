@@ -82,14 +82,14 @@ const login = async (req: Request<any, UserResponseDto|string, LoginDto>,
      res: Response<UserResponseDto | string>) => {
     const reqBody = req.body;
     if (!reqBody.userName || !reqBody.password) {
-        console.error("missing email or password")
-        return res.status(400).send("missing email or password");
+        console.error("missing userName or password")
+        return res.status(400).send("missing usrName or password");
     }
     try {
         const user = await User.findOne({ userName: reqBody.userName });
         if (user == null) {
-            console.error("there is no user with this email")
-            return res.status(401).send("there is no user with this email");
+            console.error("there is no user with this userName")
+            return res.status(401).send("there is no user with this userName");
         }
         const passwordMatch = await bcrypt.compare(reqBody.password, user.password);
         if (!passwordMatch) {
@@ -199,6 +199,8 @@ const googleLogin = async (req: Request<any, UserResponseDto|string, {token : st
     if (user == null){ 
         const userName = await tryCreateUser(googleResponse.name)  
         user = await User.create({email : googleResponse.email, userName : userName, tokens :[], isGoogleLogin : true}) 
+        const googleImage = await axios.get(googleResponse.picture, { responseType : 'arraybuffer'});
+        addPhoto(USER_PHOTOS_DIR_PATH, user._id.toString(), `data:image/png;base64,${Buffer.from(googleImage.data, 'binary').toString('base64')}`)
     } 
     loginUser(user, res);
     } catch (ex : any) { 
