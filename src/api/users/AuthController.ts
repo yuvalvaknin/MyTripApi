@@ -121,8 +121,8 @@ const logout = async (req: Request<any, string, UserIdDto>, res: Response<string
             return res.status(403).send("the token doesn't exist anymore")
         }
         user.tokens = user.tokens.filter(tok => tok !== userToken);
-        res.clearCookie('access_token')
-        res.clearCookie('refresh_token')
+        res.clearCookie('access_token', {httpOnly : true, sameSite : 'none', secure : true})
+        res.clearCookie('refresh_token', {httpOnly : true, sameSite : 'none', secure : true})
         await user.save();
         console.log(`${user.userName} logged out successfuly`)
         return res.status(200).send('logout successfuly')
