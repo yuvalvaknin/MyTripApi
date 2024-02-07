@@ -10,6 +10,7 @@ import axios from 'axios';
 import mongoose from 'mongoose';
 import { attachProfilePhoto } from './UserController';
 import { addPhoto, createPhotoDirectory } from '../../utils/photoUtils';
+import { OAuth2Client } from 'google-auth-library';
 
 export const USER_PHOTOS_DIR_PATH = createPhotoDirectory(__dirname);
 
@@ -189,12 +190,17 @@ const tryCreateUser = async (userName : string) => {
     } 
     return index === 0 ? userName : userName + index; 
 } 
- 
+const client = new OAuth2Client();
+
 const googleLogin = async (req: Request<any, UserResponseDto|string, {token : string}>, 
     res: Response<UserResponseDto | string>) => { 
     const token = req.body.token; 
     try { 
-    const googleResponse = await axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${token}`).then(res => res.data); 
+    const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const googleResponse = ticket.getPayload();
     let user : any = await User.findOne({ email : googleResponse.email }) 
     if (user == null){ 
         const userName = await tryCreateUser(googleResponse.name)  
