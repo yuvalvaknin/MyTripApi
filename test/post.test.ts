@@ -1,13 +1,9 @@
 import request from "supertest";
 import mongoose from "mongoose";
-import User, { IUser } from "../src/api/users/user";
 import app from '../src/app'
-import { testUser } from "./auth.test";
-import { LoginDto, UserResponseDto } from "../src/api/users/dtos/LoginDto";
-import RegisterDto from "../src/api/users/dtos/RegisterDto";
+import { testPictureChange as testUser } from "./user.test";
+import { LoginDto } from "../src/api/users/dtos/LoginDto";
 import createPostDto from "../src/api/posts/dtos/createPostDto";
-import PostModel from "../src/api/posts/post";
-import exp from "constants";
 import returnPostDto from "../src/api/posts/dtos/returnPostDto";
 import UpdatePostDto from "../src/api/posts/dtos/updatePostDto";
 import { ObjectId } from "mongodb";

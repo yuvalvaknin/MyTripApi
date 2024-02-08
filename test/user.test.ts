@@ -17,7 +17,7 @@ afterAll(async () => {
 let tokens : string[];
 const testUserNameChange : RegisterDto & {isGoogleLogin : boolean} = {...testUser, userName : 'TestChange', isGoogleLogin : true}
 const testPasswordChange : RegisterDto & {isGoogleLogin : boolean} = {...testUserNameChange, password : 'TestPasswordChange'}
-const testPictureChange : RegisterDto & {isGoogleLogin : boolean} = {...testPasswordChange, image : 'image-change'}
+export const testPictureChange : RegisterDto & {isGoogleLogin : boolean} = {...testPasswordChange, image : 'image-change'}
 
 describe("User tests", () => {
     test("Test Login", async () => {
