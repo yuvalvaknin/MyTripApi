@@ -1,44 +1,24 @@
 import request from "supertest";
 import mongoose from "mongoose";
-import User, { IUser } from "../src/api/users/user";
 import app from '../src/app'
-import { testUser } from "./auth.test";
-import { LoginDto, UserResponseDto } from "../src/api/users/dtos/LoginDto";
-import RegisterDto from "../src/api/users/dtos/RegisterDto";
-import createPostDto from "../src/api/posts/dtos/createPostDto";
-import PostModel from "../src/api/posts/post";
-import exp from "constants";
-import returnPostDto from "../src/api/posts/dtos/returnPostDto";
-import UpdatePostDto from "../src/api/posts/dtos/updatePostDto";
-import { ObjectId } from "mongodb";
-import { Comment } from "../src/api/comments/comment";
-import { firstPost, firstPostId } from "./post.test";
+import { LoginDto } from "../src/api/users/dtos/LoginDto";
+import { testPictureChange as testUser } from "./user.test";
+import {firstPost } from './post.test'
 import { returnCommentDto } from "../src/api/comments/dtos/returnCommentDto";
+import { Comment } from "../src/api/comments/comment";
 
-
-let postId : ObjectId;
 beforeAll(async () => {
-  console.log("beforeAll");
-  debugger
-  const response = await request(app)
-        .post("/posts")
-        .set('Cookie', tokens)
-        .send(firstPost);
-    postId = (response.body as returnPostDto).postId
+    console.log("before all");
 });
 
 afterAll(async () => {
   await mongoose.connection.close();
 });
-
 let tokens : string[];
+let firstPostId;
+let comment;
 
-const comment : Omit<Comment, 'userId'> = {
-    commentContent : 'תגובה',
-    postId : postId.toString()
-}
-
-describe("Posts tests", () => {
+describe("Comment tests", () => {
     test("Test Login", async () => {
         const response = await request(app)
           .post("/auth/login").send({
@@ -47,6 +27,16 @@ describe("Posts tests", () => {
           } as LoginDto);
         expect(response.statusCode).toBe(200);
         tokens = response.headers['set-cookie'];
+    });
+
+    test("Test Add Post", async () => {
+        const response = await request(app)
+        .post("/posts")
+        .set('Cookie', tokens)
+        .send(firstPost);
+        expect(response.statusCode).toBe(200);
+        firstPostId = response.body._id;
+        comment = {commentContent : 'תגובה',postId : firstPostId} as Omit<Comment, 'userId'>
     });
 
     test("Test create Comment without tokens", async () => {
