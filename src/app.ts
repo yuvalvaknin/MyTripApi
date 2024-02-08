@@ -15,28 +15,44 @@ import { BiMap } from './bi-map';
 import cookieParser from 'cookie-parser';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger';
+import User from './api/users/user';
+import https from 'https';
+import fs from 'fs';
 
 
 dotenv.config();
 
 const { MONGO_URI, FRONT_PATH } = process.env;
 
-const PORT = process.env.PORT || 3000;
+const PORT = (process.env.NODE_ENV === 'production' ? process.env.HTTPS_PORT : process.env.PORT) || 3000;
 
 const app = express();
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
+
+let server;
+
+if (process.env.NODE_ENV !== 'production') {
+  console.log('development');
+  server = createServer(app);
+} else {
+  console.log('PRODUCTION');
+  const options2 = {
+    key: fs.readFileSync('../client-key.pem'),
+    cert: fs.readFileSync('../client-cert.pem')
+  };
+  server = https.createServer(options2, app);
+}
+
+const io = new Server(server, {
   cors: {
-    origin: FRONT_PATH,
     methods: ['GET', 'POST'],
   },
 });
 
 app.use(cookieParser())
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb'}));
 
 app.use(cors({
-  origin : FRONT_PATH,
+  origin: true,
   credentials : true
 }));
 
@@ -62,9 +78,18 @@ io.on('connection', (socket: Socket) => {
     !users.hasValue(username) && users.set(socket.id, username);
     console.log(`${username} has connected`);
   });
-  socket.on('send-message', (message) => {
+  socket.on('send-message', async (message) => {
     try {
-      MessageModel.create(message);
+
+      const newMessage = { ...message };
+
+      const fromUser = await User.findOne({ userName : message.fromUser }); 
+      const toUser = await User.findOne({ userName : message.toUser });
+
+      newMessage.fromUser = fromUser._id;
+      newMessage.toUser = toUser._id;
+
+      MessageModel.create(newMessage);
     } catch (e) {
       console.error(e);
     }
@@ -79,10 +104,12 @@ io.on('connection', (socket: Socket) => {
   });
   socket.on('disconnect', () => {
     console.log(`${users.get(socket.id)} has disconnected`);
-    users.removeByKey(socket.id);
+    users.removeByKey(socket.id); 
   });
 });
 
-httpServer.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+server.listen(PORT, () => {
+  console.log(`Server is running on http${process.env.NODE_ENV === 'production' ? 's' : ''}://localhost:${PORT}`);
 });
+
+export default app;

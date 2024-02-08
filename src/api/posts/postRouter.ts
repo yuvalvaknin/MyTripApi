@@ -1,5 +1,6 @@
 import express from 'express';
 import { createPost, updatePost, deletePost, findAll, getPostsByCountry, getPostsByUserName  } from './postHandlers';
+import { authenticate } from '../../middlewares';
 
 const router = express.Router();
 
@@ -51,7 +52,7 @@ router.get('/', findAll);
  *     tags:
  *      - posts
  */
-router.post('/', createPost);
+router.post('/', authenticate, createPost);
 
 /**
  * @swagger
@@ -79,7 +80,7 @@ router.post('/', createPost);
  *     tags:
  *      - posts
  */
-router.put('/', updatePost);
+router.put('/',authenticate, updatePost);
 
 /**
  * @swagger
@@ -106,7 +107,7 @@ router.put('/', updatePost);
  *     tags:
  *      - posts
  */
-router.delete('/:postId', deletePost);
+router.delete('/:postId',authenticate, deletePost);
 
 /**
  * @swagger

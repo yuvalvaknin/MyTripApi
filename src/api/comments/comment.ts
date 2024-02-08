@@ -1,9 +1,9 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema, Types } from 'mongoose';
 
-export interface Comment extends Document {
+export interface Comment {
     commentContent: string;
     postId: string;
-    user: string;
+    userId: Types.ObjectId;
 }
 
 const commentSchema = new Schema({
@@ -16,8 +16,8 @@ const commentSchema = new Schema({
         ref: 'posts',
         require: true
     },
-    user: {
-        type: String, 
+    userId: {
+        type: Types.ObjectId, 
         ref: 'users',
         require: true
     }

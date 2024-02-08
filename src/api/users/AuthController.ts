@@ -3,12 +3,16 @@ import User, { IUser } from './user';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import RegisterDto from './dtos/RegisterDto';
-import {LoginDto, LoginResponseDto} from './dtos/LoginDto';
+import {LoginDto, UserResponseDto} from './dtos/LoginDto';
 import { ObjectId } from 'mongodb';
-import UserResponseDto from './dtos/UserResponseDto';
-import UserJWTPaylod from './dtos/UserJwtPaylod';
+import UserJWTPaylod, { UserIdDto } from './dtos/UserJwtPaylod';
 import axios from 'axios';
 import mongoose from 'mongoose';
+import { attachProfilePhoto } from './UserController';
+import { addPhoto, createPhotoDirectory } from '../../utils/photoUtils';
+import { OAuth2Client } from 'google-auth-library';
+
+export const USER_PHOTOS_DIR_PATH = createPhotoDirectory(__dirname);
 
 export const encryptPassword = async (password : string) => {
     const salt = await bcrypt.genSalt(10);
@@ -35,6 +39,9 @@ const register = async (req: Request<any, string, RegisterDto>, res: Response<st
         }
         const encryptedPassword = await encryptPassword(reqBody.password)
         const userCreated = await User.create({...reqBody, password: encryptedPassword, tokens : []});
+
+        addPhoto(USER_PHOTOS_DIR_PATH, userCreated._id.toString(), reqBody.image);
+
         console.log(`${userCreated.userName} registerd`)
         return res.status(201).send(userCreated.userName);
     } catch (err) {
@@ -45,19 +52,13 @@ const register = async (req: Request<any, string, RegisterDto>, res: Response<st
 
 const loginUser = async (user : (mongoose.Document<unknown, {}, IUser> & IUser & {
     _id: ObjectId;
-}), res : Response<LoginResponseDto | string>) => {
+}), res : Response<UserResponseDto | string>) => {
     const cookies = createCookies(user, res)
     if (cookies){
         user.tokens.push(cookies.refreshToken);
         await user.save();
-        console.error(`${user.userName} logged in`)
-        return res.status(200).send({
-            userName : user.userName,
-            email : user.email,
-            isGoogleLogin : user.isGoogleLogin,
-            accessToken : cookies.accessToken,
-            refreshToken : cookies.refreshToken
-        });
+        console.info(`${user.userName} logged in`)
+        return res.json(attachProfilePhoto(user));
     }
     return res;
 }
@@ -73,23 +74,23 @@ const createCookies = (user : (mongoose.Document<unknown, {}, IUser> & IUser & {
     }
     const accessToken = jwt.sign({ _id : user._id, userName : user.userName } as UserJWTPaylod, process.env.JWT_ACCESS_TOKEN, { expiresIn: process.env.JWT_EXPIRATION });
     const refreshToken = jwt.sign({ _id: user._id, userName : user.userName } as UserJWTPaylod, process.env.JWT_REFRESH_TOKEN);
-    res.cookie('access_token', accessToken);
-    res.cookie('refresh_token', refreshToken);
+    res.cookie('access_token', accessToken, {sameSite: 'none', secure: true, httpOnly: true});
+    res.cookie('refresh_token', refreshToken, {sameSite: 'none', secure: true, httpOnly: true});
     return {accessToken : accessToken, refreshToken : refreshToken}
 }
 
-const login = async (req: Request<any, LoginResponseDto|string, LoginDto>,
-     res: Response<LoginResponseDto | string>) => {
+const login = async (req: Request<any, UserResponseDto|string, LoginDto>,
+     res: Response<UserResponseDto | string>) => {
     const reqBody = req.body;
     if (!reqBody.userName || !reqBody.password) {
-        console.error("missing email or password")
-        return res.status(400).send("missing email or password");
+        console.error("missing userName or password")
+        return res.status(400).send("missing usrName or password");
     }
     try {
         const user = await User.findOne({ userName: reqBody.userName });
         if (user == null) {
-            console.error("there is no user with this email")
-            return res.status(401).send("there is no user with this email");
+            console.error("there is no user with this userName")
+            return res.status(401).send("there is no user with this userName");
         }
         const passwordMatch = await bcrypt.compare(reqBody.password, user.password);
         if (!passwordMatch) {
@@ -104,10 +105,10 @@ const login = async (req: Request<any, LoginResponseDto|string, LoginDto>,
     }
 }
 
-const logout = async (req: Request<any, string, ObjectId>, res: Response<string>) => {
+const logout = async (req: Request<any, string, UserIdDto>, res: Response<string>) => {
     try {
-        console.log(`Trying to logout user ${req.body._id}`);
-        const user = await User.findById(req.body._id);
+        console.log(`Trying to logout user ${req.body._userId}`);
+        const user = await User.findById(req.body._userId);
         const userToken = req.cookies['refresh_token'];
         if (user == null || userToken == null) {
             console.error('no user to logout');
@@ -120,8 +121,8 @@ const logout = async (req: Request<any, string, ObjectId>, res: Response<string>
             return res.status(403).send("the token doesn't exist anymore")
         }
         user.tokens = user.tokens.filter(tok => tok !== userToken);
-        res.clearCookie('access_token')
-        res.clearCookie('refresh_token')
+        res.clearCookie('access_token', {httpOnly : true, sameSite : 'none', secure : true})
+        res.clearCookie('refresh_token', {httpOnly : true, sameSite : 'none', secure : true})
         await user.save();
         console.log(`${user.userName} logged out successfuly`)
         return res.status(200).send('logout successfuly')
@@ -131,7 +132,7 @@ const logout = async (req: Request<any, string, ObjectId>, res: Response<string>
     }
 }
 
-const refreshToken = async (req: Request, res: Response, next: NextFunction) => {
+const refreshToken = async (req: Request, res: Response) => {
     console.log('trying refresh token')
     const token = req.cookies["refresh_token"];
     if (token == null) {
@@ -169,10 +170,10 @@ const refreshToken = async (req: Request, res: Response, next: NextFunction) => 
                 verifiedUser.tokens = verifiedUser.tokens.map(tok => tok === token ? tokens.refreshToken : tok );
                 await verifiedUser.save();
                 console.log(`token refreshed for ${verifiedUser.userName}`)
-                req.body = {...req.body, _id : verifiedUser._id}
-                next()
+                return res.status(200).send('token refreshed successfuly')
+            }else {
+                return res.status(400).send('problem in token refreshing')
             }
-            return res;
         } catch (error : any) {
             console.error(`couldn't refresh token: ${error.message}`)
             return res.status(403).send(error.message)
@@ -189,16 +190,23 @@ const tryCreateUser = async (userName : string) => {
     } 
     return index === 0 ? userName : userName + index; 
 } 
- 
-const googleLogin = async (req: Request<any, LoginResponseDto|string, {token : string}>, 
-    res: Response<LoginResponseDto | string>) => { 
+const client = new OAuth2Client();
+
+const googleLogin = async (req: Request<any, UserResponseDto|string, {token : string}>, 
+    res: Response<UserResponseDto | string>) => { 
     const token = req.body.token; 
     try { 
-    const googleResponse = await axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${token}`).then(res => res.data); 
+    const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const googleResponse = ticket.getPayload();
     let user : any = await User.findOne({ email : googleResponse.email }) 
     if (user == null){ 
         const userName = await tryCreateUser(googleResponse.name)  
         user = await User.create({email : googleResponse.email, userName : userName, tokens :[], isGoogleLogin : true}) 
+        const googleImage = await axios.get(googleResponse.picture, { responseType : 'arraybuffer'});
+        addPhoto(USER_PHOTOS_DIR_PATH, user._id.toString(), `data:image/png;base64,${Buffer.from(googleImage.data, 'binary').toString('base64')}`)
     } 
     loginUser(user, res);
     } catch (ex : any) { 

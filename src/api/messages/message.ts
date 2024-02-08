@@ -1,20 +1,20 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema, Types } from 'mongoose';
 
 export interface Message extends Document {
-  fromUser: string;
-  toUser: string;
+  fromUser: Types.ObjectId | string;
+  toUser: Types.ObjectId | string;
   messageContent: string;
   sendTime: Date;
 }
 
 const messageSchema = new Schema({
   fromUser: {
-    type: String, 
+    type: Types.ObjectId, 
     ref: 'users',
     require: true
   },
   toUser: {
-    type: String, 
+    type: Types.ObjectId, 
     ref: 'users',
     require: true
   },

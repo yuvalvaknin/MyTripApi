@@ -26,19 +26,19 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
   const token = req.cookies['access_token'];
   if (!token){
       console.error('there is no cookie to authenticate')
-      res.status(400).send('there is no cookies');
+      res.status(401).send('there is no cookies');
   } else {
     jwt.verify(token, process.env.JWT_ACCESS_TOKEN || '', (err : any, user : any) => {
       if (err) {
-        if (err.name === 'TokenExpiredError' && req.cookies['refresh_token']){
-          authController.refreshToken(req, res, next);
+        if (err.name === 'TokenExpiredError'){
+          res.status(401).send(err.name);
         } else {
           console.error(`token problem`)
           res.sendStatus(403);
         }
       } else {  
         console.log(`${(user as UserJWTPaylod).userName} authenticated successfuly`)
-        req.body = {...req.body, _id : (user as UserJWTPaylod)._id}
+        req.body = {...req.body, _userId : (user as UserJWTPaylod)._id}
         next()
       }
     });
