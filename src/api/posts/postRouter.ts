@@ -14,7 +14,7 @@ const router = express.Router();
  *         description: Successful response
  *         content:
  *           application/json:
- *             example: [{ postId: 1, description: 'Post 1', country: 'Israel', photo: 'base64-encoded-image', userName: 'OmriA'acchbar' }, { postId: 2, description: 'Post 2', country: 'Spain', photo: 'base64-encoded-image', userName: 'OmriA'acchbar' }]
+ *             example: [{ postId: 1, description: 'Post 1', country: 'Israel', photo: 'base64-encoded-image', userName: 'OmriAacchbar' }, { postId: 2, description: 'Post 2', country: 'Spain', photo: 'base64-encoded-image', userName: 'OmriAacchbar' }]
  *       500:
  *         description: Internal Server Error
  *         content:
@@ -36,13 +36,13 @@ router.get('/', findAll);
  *       required: true
  *       content:
  *         application/json:
- *           example: { userName: 'OmriA'acchbar', country: 'Israel', description: 'This is a new post', photo: 'base64-encoded-image' }
+ *           example: { userName: 'OmriAacchbar', country: 'Israel', description: 'This is a new post', photo: 'base64-encoded-image' }
  *     responses:
  *       200:
  *         description: Successful response
  *         content:
  *           application/json:
- *             example: { _id: 'postId', userName: 'OmriA'acchbar', country: 'Israel', description: 'This is a new post', photo: 'base64-encoded-image' }
+ *             example: { _id: 'postId', userName: 'OmriAacchbar', country: 'Israel', description: 'This is a new post', photo: 'base64-encoded-image' }
  *       500:
  *         description: Internal Server Error
  *         content:
@@ -70,7 +70,7 @@ router.post('/', createPost);
  *         description: Successful response
  *         content:
  *           application/json:
- *             example: { _id: 'postId', userName: 'OmriA'acchbar', country: 'Israel', description: 'Updated Post', photo: 'base64-encoded-image' }
+ *             example: { _id: 'postId', userName: 'OmriAacchbar', country: 'Israel', description: 'Updated Post', photo: 'base64-encoded-image' }
  *       500:
  *         description: Internal Server Error
  *         content:
@@ -121,13 +121,13 @@ router.delete('/:postId', deletePost);
  *         required: true
  *         schema:
  *           type: string
- *           example: OmriA'acchbar
+ *           example: OmriAacchbar
  *     responses:
  *       200:
  *         description: Successful response
  *         content:
  *           application/json:
- *             example: [{ postId: 1, userName: 'OmriA'acchbar', country: 'Israel', description: 'This is a new post', photo: 'base64-encoded-image' }, { postId: 2, userName: 'OmriA'acchbar', country: 'Israel', description: 'This is a new post', photo: 'base64-encoded-image' }]
+ *             example: [{ postId: 1, userName: 'OmriAacchbar', country: 'Israel', description: 'This is a new post', photo: 'base64-encoded-image' }, { postId: 2, userName: 'OmriAacchbar', country: 'Israel', description: 'This is a new post', photo: 'base64-encoded-image' }]
  *       500:
  *         description: Internal Server Error
  *         content:
@@ -157,7 +157,7 @@ router.get('/byUserName/:userName', getPostsByUserName);
  *         description: Successful response
  *         content:
  *           application/json:
- *             example: [{ postId: 1, userName: 'OmriA'acchbar', country: 'United States', description: 'This is a new post', photo: 'base64-encoded-image' }, { postId: 2, userName: 'OmriA'acchbar', country: 'United States', description: 'This is a new post', photo: 'base64-encoded-image' }]
+ *             example: [{ postId: 1, userName: 'OmriAacchbar', country: 'United States', description: 'This is a new post', photo: 'base64-encoded-image' }, { postId: 2, userName: 'OmriAacchbar', country: 'United States', description: 'This is a new post', photo: 'base64-encoded-image' }]
  *       500:
  *         description: Internal Server Error
  *         content:
