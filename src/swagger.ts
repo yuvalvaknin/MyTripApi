@@ -11,7 +11,8 @@ const options: swaggerJSDoc.Options = {
   },
   apis: ['./src/api/posts/postRouter.ts',
          './src/api/messages/messageRoute.ts',
-         './src/api/comments/commentRoute.ts'], // path to our route files
+         './src/api/comments/commentRoute.ts',
+        './src/api/users/AuthRoute.ts'], // path to our route files
 };
 
 const swaggerSpec = swaggerJSDoc(options);

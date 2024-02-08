@@ -6,7 +6,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /postComment:
+ * /comments/postComment:
  *   post:
  *     summary: Post a comment
  *     description: Create and post a new comment with the provided data.
@@ -15,7 +15,9 @@ const router = express.Router();
  *       required: true
  *       content:
  *         application/json:
- *           example: { postId: 'postId', userName: 'JohnDoe', content: 'This is a great post!' }
+ *           example: { postId: 'postId', content: 'This is a great post!' }
+ *     security:
+ *       - cookieAccessToken: []
  *     responses:
  *       200:
  *         description: Successful response
@@ -34,7 +36,7 @@ router.post('/postComment', authenticate, createComment);
 
 /**
  * @swagger
- * /commentsCounter/{postId}:
+ * /comments/commentsCounter/{postId}:
  *   get:
  *     summary: Get comments count for a post
  *     description: Retrieve the number of comments for a specific post.
@@ -64,7 +66,7 @@ router.get('/commentsCounter/:postId', getCommentsNumberPerPost);
 
 /**
  * @swagger
- * /getCommentsByPost/{postId}:
+ * /comments/getCommentsByPost/{postId}:
  *   get:
  *     summary: Get comments by post ID
  *     description: Retrieve comments associated with a specific post by post ID.

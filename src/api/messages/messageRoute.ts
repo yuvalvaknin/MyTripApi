@@ -5,7 +5,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /sendMessage:
+ * /messages/sendMessage:
  *   post:
  *     summary: Send a message
  *     description: Create and send a new message with the provided data.
@@ -33,7 +33,7 @@ router.post('/sendMessage', createNewMessage);
 
 /**
  * @swagger
- * /getChat:
+ * /messages/getChat:
  *   post:
  *     summary: Get chat messages between two users
  *     description: Retrieve chat messages between two specified users.

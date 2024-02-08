@@ -6,7 +6,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /:
+ * /posts/:
  *   get:
  *     summary: Get all posts
  *     description: Retrieve all posts from the database.
@@ -28,7 +28,7 @@ router.get('/', findAll);
 
 /**
  * @swagger
- * /:
+ * /posts/:
  *   post:
  *     summary: Create a new post
  *     description: Create a new post with the provided data.
@@ -37,7 +37,9 @@ router.get('/', findAll);
  *       required: true
  *       content:
  *         application/json:
- *           example: { userName: 'OmriAacchbar', country: 'Israel', description: 'This is a new post', photo: 'base64-encoded-image' }
+ *           example: { country: 'Israel', description: 'This is a new post', photo: 'base64-encoded-image' }
+ *     security:
+ *       - cookieAccessToken: []
  *     responses:
  *       200:
  *         description: Successful response
@@ -66,6 +68,8 @@ router.post('/', authenticate, createPost);
  *       content:
  *         application/json:
  *           example: { postId: 'postId', description: 'Updated Post', photo: 'base64-encoded-image' }
+ *     security:
+ *       - cookieAccessToken: []
  *     responses:
  *       200:
  *         description: Successful response
@@ -84,7 +88,7 @@ router.put('/',authenticate, updatePost);
 
 /**
  * @swagger
- * /{postId}:
+ * /posts/{postId}:
  *   delete:
  *     summary: Delete a post
  *     description: Delete an existing post by ID.
@@ -96,6 +100,8 @@ router.put('/',authenticate, updatePost);
  *         schema:
  *           type: string
  *           example: postId
+ *     security:
+ *       - cookieAccessToken: []
  *     responses:
  *       204:
  *         description: No Content
@@ -111,7 +117,7 @@ router.delete('/:postId',authenticate, deletePost);
 
 /**
  * @swagger
- * /byUserName/{userName}:
+ * /posts/byUserName/{userName}:
  *   get:
  *     summary: Get posts by user name
  *     description: Retrieve posts associated with a specific user by user name.
@@ -141,7 +147,7 @@ router.get('/byUserName/:userName', getPostsByUserName);
 
 /**
  * @swagger
- * /byCountry/{country}:
+ * /posts/byCountry/{country}:
  *   get:
  *     summary: Get posts by country
  *     description: Retrieve posts associated with a specific country by country name.
